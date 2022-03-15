@@ -50,6 +50,13 @@ CurveElement CurveElement::mult_by_base(){
     res.check();
     return res;
 }
+
+CurveElement CurveElement::reduce() { 
+    CurveElement res;
+    crypto_core_ristretto255_scalar_reduce(res.a, a);
+    return res;
+}
+
 CurveElement CurveElement::hash_to_elem(unsigned char *r) {
     CurveElement res;
     crypto_core_ristretto255_from_hash(res.a, r);
@@ -58,11 +65,20 @@ CurveElement CurveElement::hash_to_elem(unsigned char *r) {
 }
 CurveElement CurveElement::multi(const CurveElement& scalar){
     CurveElement res;
-    int tmp = crypto_scalarmult_ristretto255(res.a, a, scalar.a);
-    std::cout << "res from mult: " << tmp << std::endl;
+    //int tmp = crypto_scalarmult_ristretto255(res.a, a, scalar.a);
+    crypto_core_ristretto255_scalar_mul(res.a, a, scalar.a);
     res.check();
     return res;
 }
+
+CurveElement CurveElement::non_scalar_mult(const CurveElement& scalar){
+    CurveElement res;
+    //int tmp = crypto_scalarmult_ristretto255(res.a, a, scalar.a);
+    assert(crypto_scalarmult_ristretto255(res.a, a, scalar.a) == 0);
+    res.check();
+    return res;
+}
+
 
 CurveElement::CurveElement(word other)
 {
@@ -88,6 +104,12 @@ void CurveElement::make_random_element(){
     check();
 }
 
+CurveElement CurveElement::get_random_element(){
+    CurveElement res;
+    crypto_core_ristretto255_scalar_random(res.a);
+    res.check();
+    return res;
+}
 void CurveElement::check()
 {
 #ifdef CURVE_CHECK
@@ -95,7 +117,7 @@ void CurveElement::check()
         throw runtime_error("curve point not valid");
 #endif
 }
-
+/*
 CurveElement CurveElement::operator +(const CurveElement& other) const
 {
     CurveElement res;
@@ -112,6 +134,7 @@ CurveElement CurveElement::operator -(const CurveElement& other) const
     return res;
 }
 
+*/
 CurveElement CurveElement::operator *(const Scalar& other) const
 {
     CurveElement res;
@@ -124,6 +147,23 @@ CurveElement CurveElement::operator *(const Scalar& other) const
     res.check();
     return res;
 }
+
+CurveElement CurveElement::operator +(const CurveElement& other) const
+{
+    CurveElement res;
+    crypto_core_ristretto255_scalar_add(res.a, a, other.a);
+    res.check();
+    return res;
+}
+
+CurveElement CurveElement::operator -(const CurveElement& other) const
+{
+    CurveElement res;
+    crypto_core_ristretto255_scalar_sub(res.a, a, other.a);
+    res.check();
+    return res;
+}
+
 
 CurveElement& CurveElement::operator +=(const CurveElement& other)
 {

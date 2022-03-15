@@ -34,10 +34,12 @@ public:
     CurveElement();
     CurveElement(const Scalar& other);
     CurveElement(word other);
-
+    CurveElement reduce();
     void make_random_element();
+    static CurveElement get_random_element();
     CurveElement mult_by_base();
     CurveElement multi(const CurveElement& other);
+    CurveElement non_scalar_mult(const CurveElement& other);
     void set_a(const unsigned char scalar);
     static CurveElement hash_to_elem(unsigned char *r);
     void check();
