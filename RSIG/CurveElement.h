@@ -34,19 +34,26 @@ public:
     CurveElement();
     CurveElement(const Scalar& other);
     CurveElement(word other);
-    CurveElement reduce();
-    void make_random_element();
-    static CurveElement get_random_element();
-    CurveElement mult_by_base();
-    CurveElement multi(const CurveElement& other);
-    CurveElement non_scalar_mult(const CurveElement& other);
-    void set_a(const unsigned char scalar);
-    static CurveElement hash_to_elem(unsigned char *r);
+
     void check();
+
     const unsigned char* get() const { return a; }
+
     CurveElement operator+(const CurveElement& other) const;
     CurveElement operator-(const CurveElement& other) const;
     CurveElement operator*(const Scalar& other) const;
+    
+    CurveElement new_mult(const CurveElement& other) const;
+    CurveElement new_add(const CurveElement& other) const;
+    CurveElement new_sub(const CurveElement& other) const;
+    
+    static CurveElement random_group_element();
+    static CurveElement random_scalar_element();
+    static CurveElement hash_to_group(unsigned char* r);
+    static CurveElement base_mult(CurveElement& other);
+
+    CurveElement reduce();
+
     CurveElement& operator+=(const CurveElement& other);
 
     bool operator==(const CurveElement& other) const;

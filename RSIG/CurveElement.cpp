@@ -25,7 +25,7 @@ void CurveElement::convert(unsigned char* res, const Scalar& other)
 {
     bigint tmp;
     tmp = other;
-
+    assert(tmp.__get_mp()->_mp_size * sizeof(mp_limb_t) <= crypto_core_ristretto255_SCALARBYTES);
     memset(res, 0, crypto_core_ristretto255_SCALARBYTES);
     memcpy(res, tmp.__get_mp()->_mp_d, abs(tmp.__get_mp()->_mp_size) * sizeof(mp_limb_t));
 }
@@ -44,42 +44,6 @@ CurveElement::CurveElement(const Scalar& other)
     check();
 }
 
-CurveElement CurveElement::mult_by_base(){
-    CurveElement res;
-    crypto_scalarmult_ristretto255_base(res.a, a);
-    res.check();
-    return res;
-}
-
-CurveElement CurveElement::reduce() { 
-    CurveElement res;
-    crypto_core_ristretto255_scalar_reduce(res.a, a);
-    return res;
-}
-
-CurveElement CurveElement::hash_to_elem(unsigned char *r) {
-    CurveElement res;
-    crypto_core_ristretto255_from_hash(res.a, r);
-    res.check();
-    return res;
-}
-CurveElement CurveElement::multi(const CurveElement& scalar){
-    CurveElement res;
-    //int tmp = crypto_scalarmult_ristretto255(res.a, a, scalar.a);
-    crypto_core_ristretto255_scalar_mul(res.a, a, scalar.a);
-    res.check();
-    return res;
-}
-
-CurveElement CurveElement::non_scalar_mult(const CurveElement& scalar){
-    CurveElement res;
-    //int tmp = crypto_scalarmult_ristretto255(res.a, a, scalar.a);
-    assert(crypto_scalarmult_ristretto255(res.a, a, scalar.a) == 0);
-    res.check();
-    return res;
-}
-
-
 CurveElement::CurveElement(word other)
 {
     if (other == 0)
@@ -94,22 +58,6 @@ CurveElement::CurveElement(word other)
     check();
 }
 
-void CurveElement::set_a(const unsigned char new_a){
-   // std::strcpy(a, new_a);
-    std::cout << new_a;
-}
-
-void CurveElement::make_random_element(){
-    crypto_core_ristretto255_scalar_random(a);
-    check();
-}
-
-CurveElement CurveElement::get_random_element(){
-    CurveElement res;
-    crypto_core_ristretto255_scalar_random(res.a);
-    res.check();
-    return res;
-}
 void CurveElement::check()
 {
 #ifdef CURVE_CHECK
@@ -117,7 +65,7 @@ void CurveElement::check()
         throw runtime_error("curve point not valid");
 #endif
 }
-/*
+
 CurveElement CurveElement::operator +(const CurveElement& other) const
 {
     CurveElement res;
@@ -134,7 +82,6 @@ CurveElement CurveElement::operator -(const CurveElement& other) const
     return res;
 }
 
-*/
 CurveElement CurveElement::operator *(const Scalar& other) const
 {
     CurveElement res;
@@ -148,7 +95,8 @@ CurveElement CurveElement::operator *(const Scalar& other) const
     return res;
 }
 
-CurveElement CurveElement::operator +(const CurveElement& other) const
+
+CurveElement CurveElement::new_add(const CurveElement& other) const
 {
     CurveElement res;
     crypto_core_ristretto255_scalar_add(res.a, a, other.a);
@@ -156,7 +104,7 @@ CurveElement CurveElement::operator +(const CurveElement& other) const
     return res;
 }
 
-CurveElement CurveElement::operator -(const CurveElement& other) const
+CurveElement CurveElement::new_sub(const CurveElement& other) const
 {
     CurveElement res;
     crypto_core_ristretto255_scalar_sub(res.a, a, other.a);
@@ -164,6 +112,56 @@ CurveElement CurveElement::operator -(const CurveElement& other) const
     return res;
 }
 
+CurveElement CurveElement::new_mult(const CurveElement& scalar) const {
+    CurveElement res;
+    //cout << "attempt gives: " << crypto_scalarmult_ristretto255(res.a, scalar.a, a) << endl;
+    /*
+    if (crypto_core_ristretto255_scalar_mul(res.a, scalar.a, a) < 0)
+    {
+        cerr << "EC multiplication by zero" << endl;
+    }  */
+    crypto_core_ristretto255_scalar_mul(res.a, scalar.a, a);
+    res.check();
+    return res;
+}
+
+CurveElement CurveElement::random_group_element() { 
+    CurveElement tmp;
+    crypto_core_ristretto255_random(tmp.a);
+    tmp.check();
+    return tmp;
+}
+
+CurveElement CurveElement::random_scalar_element() {
+    CurveElement tmp;
+    crypto_core_ristretto255_scalar_random(tmp.a);
+    tmp.check();
+    return tmp;
+}
+
+CurveElement CurveElement::hash_to_group(unsigned char *r) {
+    CurveElement tmp;
+    crypto_core_ristretto255_from_hash(tmp.a, r);
+    return tmp;
+}
+
+CurveElement CurveElement::base_mult(CurveElement& other) {
+    CurveElement res;
+
+     if (crypto_scalarmult_ristretto255_base(res.a, other.a) < 0)
+    {
+        cout << "mikkel" << endl;
+        cerr << "EC multiplication by zero" << endl;
+    }
+    res.check();
+    return res;
+}
+
+CurveElement CurveElement::reduce() { 
+    CurveElement res;
+    crypto_core_ristretto255_scalar_reduce(res.a, a);
+    return res;
+}
 
 CurveElement& CurveElement::operator +=(const CurveElement& other)
 {

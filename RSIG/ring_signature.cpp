@@ -60,7 +60,7 @@ CurveElement compute_challenge(int n, sign_values* v, bool verifying = false){
             }
         }
     crypto_hash_sha512_final(&state, out);
-    CurveElement res = CurveElement::test(out);
+    CurveElement res = CurveElement::hash_to_group(out);
     return res;
     } else {
     unsigned char out_prime[crypto_hash_sha512_BYTES]; 
@@ -74,7 +74,7 @@ CurveElement compute_challenge(int n, sign_values* v, bool verifying = false){
             }
         }
     crypto_hash_sha512_final(&state_prime, out_prime);
-    CurveElement res = CurveElement::test(out_prime);
+    CurveElement res = CurveElement::hash_to_group(out_prime);
     return res;
     } 
     
