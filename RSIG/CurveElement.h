@@ -43,13 +43,13 @@ public:
     CurveElement operator-(const CurveElement& other) const;
     CurveElement operator*(const Scalar& other) const;
     
-    CurveElement new_mult(const CurveElement& other) const;
-    CurveElement new_add(const CurveElement& other) const;
-    CurveElement new_sub(const CurveElement& other) const;
+    static CurveElement new_mult(const CurveElement& x, const CurveElement& y);
+    static CurveElement new_add(const CurveElement& x, const CurveElement& y);
+    static CurveElement new_sub(const CurveElement& x, const CurveElement& y);
     
     static CurveElement random_group_element();
     static CurveElement random_scalar_element();
-    static CurveElement hash_to_group(unsigned char* r);
+    CurveElement hash_to_group() const;
     static CurveElement base_mult(CurveElement& other);
 
     CurveElement reduce();

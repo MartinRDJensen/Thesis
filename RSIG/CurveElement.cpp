@@ -96,23 +96,23 @@ CurveElement CurveElement::operator *(const Scalar& other) const
 }
 
 
-CurveElement CurveElement::new_add(const CurveElement& other) const
+CurveElement CurveElement::new_add(const CurveElement& x, const CurveElement& y) 
 {
     CurveElement res;
-    crypto_core_ristretto255_scalar_add(res.a, a, other.a);
+    crypto_core_ristretto255_scalar_add(res.a, x.a, y.a);
     res.check();
     return res;
 }
 
-CurveElement CurveElement::new_sub(const CurveElement& other) const
+CurveElement CurveElement::new_sub(const CurveElement& x, const CurveElement& y) 
 {
     CurveElement res;
-    crypto_core_ristretto255_scalar_sub(res.a, a, other.a);
+    crypto_core_ristretto255_scalar_sub(res.a, x.a, y.a);
     res.check();
     return res;
 }
 
-CurveElement CurveElement::new_mult(const CurveElement& scalar) const {
+CurveElement CurveElement::new_mult(const CurveElement& x, const CurveElement& y)  {
     CurveElement res;
     //cout << "attempt gives: " << crypto_scalarmult_ristretto255(res.a, scalar.a, a) << endl;
     /*
@@ -120,7 +120,7 @@ CurveElement CurveElement::new_mult(const CurveElement& scalar) const {
     {
         cerr << "EC multiplication by zero" << endl;
     }  */
-    crypto_core_ristretto255_scalar_mul(res.a, scalar.a, a);
+    crypto_core_ristretto255_scalar_mul(res.a, x.a, y.a);
     res.check();
     return res;
 }
@@ -139,9 +139,9 @@ CurveElement CurveElement::random_scalar_element() {
     return tmp;
 }
 
-CurveElement CurveElement::hash_to_group(unsigned char *r) {
+CurveElement CurveElement::hash_to_group() const {
     CurveElement tmp;
-    crypto_core_ristretto255_from_hash(tmp.a, r);
+    crypto_core_ristretto255_from_hash(tmp.a, a);
     return tmp;
 }
 
@@ -204,6 +204,7 @@ octetStream CurveElement::hash(size_t n_bytes) const
     octetStream os;
     pack(os);
     auto res = os.hash();
+
     assert(n_bytes >= res.get_length());
     res.resize_precise(n_bytes);
     return res;
