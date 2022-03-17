@@ -49,7 +49,7 @@ public:
     
     static CurveElement random_group_element();
     static CurveElement random_scalar_element();
-    CurveElement hash_to_group() const;
+    static CurveElement hash_to_group(unsigned char* h);
     static CurveElement base_mult(CurveElement& other);
 
     CurveElement reduce();

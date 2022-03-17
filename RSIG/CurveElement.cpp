@@ -139,9 +139,9 @@ CurveElement CurveElement::random_scalar_element() {
     return tmp;
 }
 
-CurveElement CurveElement::hash_to_group() const {
+CurveElement CurveElement::hash_to_group(unsigned char* h) {
     CurveElement tmp;
-    crypto_core_ristretto255_from_hash(tmp.a, a);
+    crypto_core_ristretto255_from_hash(tmp.a, h);
     return tmp;
 }
 

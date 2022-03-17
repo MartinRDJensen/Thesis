@@ -28,17 +28,29 @@ struct sign_values{
 };
 
 CurveElement get_hash(CurveElement to_hash){
+
+    unsigned char out[crypto_hash_sha512_BYTES];
+
+    crypto_hash_sha512(out, to_hash.get(), crypto_core_ristretto255_BYTES);
+    CurveElement hP = CurveElement::hash_to_group(out);
+
+    cout << "hP is " << hP << endl;
+    cout << "hP reduce is " << hP.reduce() << std::endl;
+
+    /*
     CurveElement hP = to_hash;
     octetStream os = hP.hash(crypto_hash_sha512_BYTES);
     
     hP.pack(os);
     hP.unpack(os);
-    /*
+    hP.check();
+    
     cout << "hhp before hash to group " << hP << endl;
     CurveElement hpp = hP.hash_to_group();
 
     cout << "hhp after hash to group " << hpp << endl;
     */
+    // return hP.reduce(); Dette virker ikke, giver alt 0 :O
     return hP;
 }
 
