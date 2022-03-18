@@ -28,33 +28,6 @@ struct sign_values{
     std::vector<CurveElement::Scalar> r_values;
 };
 
-CurveElement get_hash(CurveElement to_hash){
-
-    unsigned char out[crypto_hash_sha512_BYTES];
-
-    crypto_hash_sha512(out, to_hash.get(), crypto_core_ristretto255_BYTES);
-    CurveElement hP = CurveElement::hash_to_group(out);
-
-    cout << "hP is " << hP << endl;
-    cout << "hP reduce is " << hP.reduce() << std::endl;
-
-    /*
-    CurveElement hP = to_hash;
-    octetStream os = hP.hash(crypto_hash_sha512_BYTES);
-    
-    hP.pack(os);
-    hP.unpack(os);
-    hP.check();
-    
-    cout << "hhp before hash to group " << hP << endl;
-    CurveElement hpp = hP.hash_to_group();
-
-    cout << "hhp after hash to group " << hpp << endl;
-    */
-    // return hP.reduce(); Dette virker ikke, giver alt 0 :O
-    return hP;
-}
-
 CurveElement::Scalar hash_to_scalar(const unsigned char* h) {
     auto& tmp = bigint::tmp;
     mpz_import(tmp.get_mpz_t(), crypto_hash_sha512_BYTES, -1, 1, 0, 0, h);
@@ -69,8 +42,10 @@ std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen() {
     CurveElement pk = generator.operator*(sk); 
     cout << "pk is " << pk << std::endl;
     
-    CurveElement hP = get_hash(pk);
-    cout << "hp  is " << hP << endl;
+    //CurveElement hP = get_hash(pk);
+    unsigned char h[crypto_hash_sha512_BYTES];
+    CurveElement::get_hash(h, pk);
+    CurveElement hP = CurveElement::hash_to_group(h);
     CurveElement I = hP.operator*(sk);
 
     cout << "II is " << I << endl;
@@ -155,10 +130,12 @@ bool verify(sign_values* v){
         CurveElement rG = generator.operator*(v->r_values.at(i));       
         CurveElement cP = v->P.operator*(v->c_values.at(i));              
         v->L_prime.push_back(rG.operator+(cP));                            
-        
-        CurveElement h = get_hash(v->P);
-        cout << "hP is " << h << endl;
-        CurveElement rH = h.operator*(v->r_values.at(i));              
+        unsigned char h[crypto_hash_sha512_BYTES];
+        CurveElement::get_hash(h, v->P);
+        CurveElement hP = CurveElement::hash_to_group(h);
+        //CurveElement h = get_hash(v->P);
+        cout << "hP is " << hP << endl;
+        CurveElement rH = hP.operator*(v->r_values.at(i));              
         CurveElement cI = v->I.operator*(v->c_values.at(i));               
 
         v->R_prime.push_back(rH.operator+(cI));
@@ -205,11 +182,14 @@ sign_values j(int n, CurveElement::Scalar x,CurveElement P, CurveElement I){
         v.L_prime.push_back(CurveElement::random_scalar_element());
         */
         
-        CurveElement h = get_hash(P);
-        cout << "hP is " << h << endl;
+        //CurveElement h = get_hash(P);
+        unsigned char h[crypto_hash_sha512_BYTES];
+        CurveElement::get_hash(h, P);
+        CurveElement hP = CurveElement::hash_to_group(h);
+        cout << "hP is " << hP << endl;
         
         CurveElement qG = generator.operator*(v.q_values.at(i)); 
-        CurveElement qHP = h.operator*(v.q_values.at(i));
+        CurveElement qHP = hP.operator*(v.q_values.at(i));
         if(3 == i) {
             v.L_values.push_back(qG);
             v.R_values.push_back(qHP);

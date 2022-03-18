@@ -1,5 +1,4 @@
 #include "RSIG/transaction.h"
-#include "ECDSA/CurveElement.h"
 #include <iostream>
 
 BlockChainTransaction::BlockChainTransaction(int amount)
@@ -7,7 +6,7 @@ BlockChainTransaction::BlockChainTransaction(int amount)
 }
 
 
-void BlockChainTransaction::set_transaction(){
+void BlockChainTransaction::make_fake_tx(){
     /*
      *   JUST USED TO SPAWN FAKE PREVIOUS TRANSACTIONS
      *   WORKS AS WHEN THEY ARE MADE CORRECTLY THEN THE
@@ -25,12 +24,12 @@ BlockChain::BlockChain(){
 
 void BlockChain::print_block_chain(){
     for(BlockChainTransaction TX : block_chain){
-        std::cout << TX << std::endl;
+        std::cout << TX.destination_key << std::endl;
     }
     std::cout << "Total amount on block chain is: " << block_chain.size() << std::endl;
 }
 
-void BlockChain::add_transaction(BlockChainTransaction TX){
+void BlockChain::bc_add_transaction(BlockChainTransaction TX){
     bool valid_transaction = true;
     for(BlockChainTransaction existing_TX : block_chain) {
         if(existing_TX.key_image == TX.key_image){
@@ -42,15 +41,8 @@ void BlockChain::add_transaction(BlockChainTransaction TX){
         block_chain.push_back(TX);
     }
 }
-CurveElement TX_pk;
-        CurveElement key_image;
-        std::vector<CurveElement> destination_key_coll;
-        SignatureTransaction(int amount);
-        void sample_destination_keys(int n, BlockChain block_chain);
-        void set_transaction(CurveElement A, CurveElement B);
-        static unsigned char convert(SignatureTransaction TX);
 
-SignatureTransaction::SignatureTransaction(int amount, Party receiver, CurveElement key_image)
+SignatureTransaction::SignatureTransaction(int amount, CurveElement A, CurveElement B, CurveElement key_image)
     : amount(amount), key_image(key_image) {
     CurveElement G(1);
 
@@ -60,24 +52,28 @@ SignatureTransaction::SignatureTransaction(int amount, Party receiver, CurveElem
     TX_pk = R;
     
     //Computing D = Hs(rA)G + B
-    CurveElement rA = receiver.public_key_A.operator*(r);
-    CurveElement h = CurveElement::get_hash(rA);
+    CurveElement rA = A.operator*(r);
+    unsigned char h[crypto_hash_sha512_BYTES];
+    CurveElement::get_hash(h, rA);
     CurveElement::Scalar h_rA = hash_to_scalar(h);
     CurveElement hashG = G.operator*(h_rA);
     CurveElement dest_key = hashG.operator+(B);
     destination_key_coll.push_back(dest_key);
 }
 
-SignatureTransaction::sample_destination_keys(int n, BlockChain block_chain){
-    for(BlockChain tx : block_chain) {
-       int rand = (rand() % 10) +1;
-       if(destination_key_coll.size() == n){ break; }
-       if(rand >= 5){
-            destination_key_coll.push_back(tx);
+void SignatureTransaction::sample_destination_keys(int n, BlockChain bc){
+    int count = 0;
+    for(BlockChainTransaction tx : bc.block_chain) {
+        //FIDDLE WITH RANDOM SAMPLING AT SOME POINT
+       int rando = (rand() % 10) +1;
+       if(count == n){ break; }
+       if(rando >= 5){
+            destination_key_coll.push_back(tx.destination_key);
+            count++;
        }
     }
 }
-
+/*
 unsigned char SignatureTransaction::convert(SignatureTransaction){
-
-}
+    return NULL;
+}*/
