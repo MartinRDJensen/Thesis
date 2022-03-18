@@ -2,5 +2,5 @@
 #include "RSIG/ring_signature.h"
 
 int main(){
-    Party doris;
+    Party doris(5);
 }

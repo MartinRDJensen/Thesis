@@ -1,4 +1,5 @@
 #include "RSIG/party.h"
+#include <iostream>
 Party::Party(){
     auto keys = gen();
     secret_key_a = get<0>(keys);
