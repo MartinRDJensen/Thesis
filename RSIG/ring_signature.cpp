@@ -7,6 +7,7 @@
 #include "Math/gfp.hpp"
 #include <stdio.h>
 #include <string.h>
+#include "RSIG/ring_signature.h"
 
 using namespace std;
 CurveElement generator(1); //CurveElement::random_scalar_element();
@@ -61,6 +62,7 @@ CurveElement::Scalar hash_to_scalar(const unsigned char* h) {
 }
 
 std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen() { 
+    CurveElement::init();
     auto sk = SeededPRNG().get<CurveElement::Scalar>();
     cout << "sk " << sk << endl;
     cout << "generator is " << generator << endl;
@@ -224,9 +226,8 @@ sign_values j(int n, CurveElement::Scalar x,CurveElement P, CurveElement I){
 }
 
 
-int main() {
-    CurveElement::init();
-    auto keypair = gen();
+/*    auto keypair = gen();
+    Party doris;
 
     cout << "oihjio" << endl;
     sign_values v = j(n,get<0>(keypair), get<1>(keypair), get<2>(keypair));
@@ -238,7 +239,7 @@ int main() {
     cout << "oihjio" << endl;
     bool verifies = verify(&v);
     assert(verifies);
-    /*
+   
     PRNG G;
     G.InitSeed();
 
@@ -254,7 +255,3 @@ int main() {
         cout << "læijhugf " << k << endl;
     }
     */
-
-    
-    return 0;
-}
