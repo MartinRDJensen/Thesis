@@ -1,6 +1,5 @@
 #include "ECDSA/CurveElement.h"
 #include "RSIG/transaction.h"
-#include "RSIG/ring_signature.h"
 #include <vector>
 
 

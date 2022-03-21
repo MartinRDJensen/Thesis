@@ -11,22 +11,8 @@
 
 using namespace std;
 CurveElement generator(1); //CurveElement::random_scalar_element();
-int n = 5;
+//int n = 5;
 
-struct sign_values{
-    CurveElement I;
-    CurveElement x;
-    CurveElement P;
-    CurveElement hP;
-    std::vector<CurveElement> L_prime;
-    std::vector<CurveElement> R_prime;
-    std::vector<CurveElement::Scalar> q_values;
-    std::vector<CurveElement::Scalar> w_values;
-    std::vector<CurveElement> L_values;
-    std::vector<CurveElement> R_values;
-    std::vector<CurveElement::Scalar> c_values;
-    std::vector<CurveElement::Scalar> r_values;
-};
 
 CurveElement::Scalar hash_to_scalar(const unsigned char* h) {
     auto& tmp = bigint::tmp;
@@ -54,53 +40,46 @@ std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen() {
 
 
 
-CurveElement::Scalar compute_challenge(int n, sign_values* v, bool verifying = false){
-    
-    if (!verifying) { 
+CurveElement::Scalar compute_challenge(sign_values* v, bool verifying = false){
     unsigned char out[crypto_hash_sha512_BYTES]; 
     crypto_hash_sha512_state state;
     crypto_hash_sha512_init(&state);
-        for(int i = 0; i < n*2; i++){
-            if (i < n){
+    crypto_hash_sha512_update(&state, v->m, crypto_core_ristretto255_BYTES);
+    if (!verifying) { 
+    
+        for(vector<int>::size_type i = 0; i < v->P.size()*2; i++){
+            if (i < v->P.size()){
                 crypto_hash_sha512_update(&state, v->L_values.at(i).get(), crypto_core_ristretto255_BYTES); //sizeof(v->L_values.at(i)));
             } else {
-                crypto_hash_sha512_update(&state, v->R_values.at(i - n).get(),crypto_core_ristretto255_BYTES); // sizeof(v->R_values.at(i - n)));
+                crypto_hash_sha512_update(&state, v->R_values.at(i - v->P.size()).get(),crypto_core_ristretto255_BYTES); // sizeof(v->R_values.at(i - n)));
             }
         }
+    } else {
+        for(vector<int>::size_type i = 0; i < v->P.size()*2; i++){
+            if (i < v->P.size()){
+                crypto_hash_sha512_update(&state, v->L_prime.at(i).get(),crypto_core_ristretto255_BYTES); //sizeof(v->L_prime.at(i)));
+            } else {
+                crypto_hash_sha512_update(&state, v->R_prime.at(i - v->P.size()).get(), crypto_core_ristretto255_BYTES); //sizeof(v->R_prime.at(i-n)));
+            }
+        }
+    
+    } 
     crypto_hash_sha512_final(&state, out);
     CurveElement::Scalar res = hash_to_scalar(out);
     return res;
-    } else {
-    unsigned char out_prime[crypto_hash_sha512_BYTES]; 
-    crypto_hash_sha512_state state_prime;
-    crypto_hash_sha512_init(&state_prime);
-        for(int i = 0; i < n*2; i++){
-            if (i < n){
-                crypto_hash_sha512_update(&state_prime, v->L_prime.at(i).get(),crypto_core_ristretto255_BYTES); //sizeof(v->L_prime.at(i)));
-            } else {
-                crypto_hash_sha512_update(&state_prime, v->R_prime.at(i-n).get(), crypto_core_ristretto255_BYTES); //sizeof(v->R_prime.at(i-n)));
-            }
-        }
-    crypto_hash_sha512_final(&state_prime, out_prime);
-    CurveElement::Scalar res = hash_to_scalar(out_prime);
-    return res;
-    } 
-    
 }
 
 
 
 void split_c(sign_values* v){
-    CurveElement::Scalar c = compute_challenge(n, v);
-    //cout << "The challenge is found to be: NOT REDUCED " << c << endl;
-    //cout << "----------------------------------------" << endl;
+    CurveElement::Scalar c = compute_challenge(v);
     cout << "The challenge is found to be: REDUCED " << c << endl;
-    //cout << "----------------------------------------" << endl;
-    for(int i = 0; i < n; i++ ){
-        if(i == 3){
+    cout << "size of P is " << v->P.size() << endl;
+    for(vector<int>::size_type i = 0; i < v->P.size(); i++ ){
+        if(i == 0){
             CurveElement::Scalar zero_scalar;
-            for(int j = 0; j < n; j++){     
-                if(j != 3){
+            for(vector<int>::size_type j = 0; j < v->P.size(); j++){     
+                if(j != 0){
                     zero_scalar = zero_scalar + v->w_values.at(j);
                 }
             }
@@ -114,8 +93,8 @@ void split_c(sign_values* v){
 }
 
 void set_r_values(CurveElement::Scalar x, sign_values* v){
-    for(int i = 0; i < n; i++){
-        if(i == 3){
+    for(vector<int>::size_type i = 0; i < v->P.size(); i++){
+        if(i == 0){
             CurveElement::Scalar tmp = x * v->c_values.at(i); 
             v->r_values.push_back(v->q_values.at(i) - tmp); 
         } else {
@@ -126,12 +105,12 @@ void set_r_values(CurveElement::Scalar x, sign_values* v){
 }
 
 bool verify(sign_values* v){
-    for(int i = 0; i < n; i++){
+    for(vector<int>::size_type i = 0; i < v->P.size(); i++){
         CurveElement rG = generator.operator*(v->r_values.at(i));       
-        CurveElement cP = v->P.operator*(v->c_values.at(i));              
+        CurveElement cP = v->P.at(i).operator*(v->c_values.at(i));              
         v->L_prime.push_back(rG.operator+(cP));                            
         unsigned char h[crypto_hash_sha512_BYTES];
-        CurveElement::get_hash(h, v->P);
+        CurveElement::get_hash(h, v->P.at(i));
         CurveElement hP = CurveElement::hash_to_group(h);
         //CurveElement h = get_hash(v->P);
         cout << "hP is " << hP << endl;
@@ -146,13 +125,13 @@ bool verify(sign_values* v){
         std::cout << "LPRIME == L?: " << v->L_prime[i].operator==(v->L_values[i]) << std::endl;
     }
 
-    CurveElement::Scalar challenge_prime = compute_challenge(n, v, true);
+    CurveElement::Scalar challenge_prime = compute_challenge(v, true);
     /*std::cout << "------------------------------------------" << std::endl;
     std::cout << "unpadded: " << c_padded << "=?=" << c_verf_padded << std::endl;
     std::cout << "------------------------------------------" << std::endl;*/
     CurveElement::Scalar toAssert;
     std::cout << "SUMMING THE C_VALUES" << std::endl;
-    for(int i = 0; i < n; i++){
+    for(vector<int>::size_type i = 0; i < v->P.size(); i++){
         toAssert = toAssert + v->c_values.at(i); 
     }
     std::cout << "res is: " << toAssert << std::endl;
@@ -162,13 +141,13 @@ bool verify(sign_values* v){
     return true;
 }
 
-sign_values j(int n, CurveElement::Scalar x,CurveElement P, CurveElement I){
+sign_values j(unsigned char* m, CurveElement::Scalar x, vector<CurveElement> P, CurveElement I){
     sign_values v;
     v.x = x;
     v.P = P;
     v.I = I;
-    
-    for (int i = 0; i < n; i++){
+    v.m = m;
+    for (vector<int>::size_type i = 0; i < v.P.size(); i++){
         
         v.q_values.push_back(SeededPRNG().get<CurveElement::Scalar>());
         v.w_values.push_back(SeededPRNG().get<CurveElement::Scalar>());
@@ -184,19 +163,18 @@ sign_values j(int n, CurveElement::Scalar x,CurveElement P, CurveElement I){
         
         //CurveElement h = get_hash(P);
         unsigned char h[crypto_hash_sha512_BYTES];
-        CurveElement::get_hash(h, P);
+        CurveElement::get_hash(h, P.at(i));
         CurveElement hP = CurveElement::hash_to_group(h);
-        cout << "hP is " << hP << endl;
         
         CurveElement qG = generator.operator*(v.q_values.at(i)); 
         CurveElement qHP = hP.operator*(v.q_values.at(i));
-        if(3 == i) {
+        if(0 == i) {
             v.L_values.push_back(qG);
             v.R_values.push_back(qHP);
         } else {
             //cout << "pk is " << pk << " and w[i] is " << ws[i] << endl;
             //cout << "I is " << I << " and w[i] is " << ws[i] << endl;
-            v.L_values.push_back(qG.operator+(P.operator*(v.w_values.at(i))));
+            v.L_values.push_back(qG.operator+(P.at(i).operator*(v.w_values.at(i))));
             v.R_values.push_back(qHP.operator+(I.operator*(v.w_values.at(i))));
 
           
