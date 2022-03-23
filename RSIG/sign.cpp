@@ -1,4 +1,4 @@
-#include "ECDSA/CurveElement.h"
+#include "CurveElement.h"
 #include "Tools/Bundle.h"
 //#include "preprocessing.hpp"
 #include "Math/gfp.hpp"

@@ -1,9 +1,9 @@
-#include "ECDSA/CurveElement.h"
+#include "CurveElement.h"
 #include "RSIG/transaction.h"
 #include <vector>
 
 
-class Party{ 
+class Party{
     private:
         CurveElement::Scalar secret_key_a;
         CurveElement::Scalar secret_key_b;
@@ -16,7 +16,7 @@ class Party{
         bool is_transaction_for_me(SignatureTransaction TX);
 
         //update below to add block_chain transactino at some point
-        void include_new_transaction(CurveElement::Scalar x); 
+        void include_new_transaction(CurveElement::Scalar x);
 };
 
 

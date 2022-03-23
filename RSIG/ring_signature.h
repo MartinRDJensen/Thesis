@@ -1,4 +1,4 @@
-#include "ECDSA/CurveElement.h"
+#include "CurveElement.h"
 #include <tuple>
 
 struct sign_values{

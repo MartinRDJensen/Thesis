@@ -1,4 +1,4 @@
-#include "ECDSA/CurveElement.h"
+#include "CurveElement.h"
 #include "RSIG/ring_signature.h"
 #include <vector>
 
@@ -11,7 +11,7 @@ class BlockChainTransaction{
         CurveElement destination_key;
         CurveElement key_image;
         BlockChainTransaction(int amount);
-        void make_fake_tx(); 
+        void make_fake_tx();
 };
 
 class BlockChain{
@@ -33,7 +33,7 @@ class SignatureTransaction{
         std::vector<CurveElement> destination_key_coll;
         SignatureTransaction(int amount, CurveElement A, CurveElement B, CurveElement key_image);
         void sample_destination_keys(int n, BlockChain block_chain);
-        
+
         // NEEDED FOR HASHING LATER
         //static unsigned char convert(SignatureTransaction TX);
 };
