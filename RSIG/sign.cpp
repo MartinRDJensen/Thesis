@@ -178,6 +178,8 @@ int main(){
     tmp = tmp + var;
   }
   assert(tmp == get<0>(test_keys));
+
+  std::cout << "it moved the folders" << std::endl;
 }
 
 
