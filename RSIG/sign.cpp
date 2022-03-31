@@ -177,11 +177,20 @@ bool check(SignatureTransaction *tx, RingSignature signature,
 
 template <template <class U> class T>
 RingSignature
-sign(const unsigned char *message, size_t length, RSIGTuple<T> tuple,
+sign(const unsigned char *message, RSIGTuple<T> tuple,
      typename T<CurveElement::Scalar>::MAC_Check &MC,
      typename T<CurveElement>::MAC_Check &MCc, Player &P, RSIGOptions opts,
      CurveElement pk, T<CurveElement::Scalar> sk = {},
      SubProcessor<T<CurveElement::Scalar>> *proc = 0) {
+
+  auto& protocol = proc->protocol;
+    if (proc)
+    {
+        protocol.init_mul();
+        protocol.prepare_mul(sk, tuple.a);
+        protocol.start_exchange();
+    }
+  cout << message << endl;
   (void)pk;
   Timer timer;
   timer.start();
@@ -190,44 +199,11 @@ sign(const unsigned char *message, size_t length, RSIGTuple<T> tuple,
   RingSignature signature;
   std::vector<CurveElement> opened_R;
   std::vector<CurveElement> opened_L;
-  std::vector<CurveElement> opened_responses;
-  std::vector<CurveElement> opened_challenges;
-  MCc.POpen_Begin(opened_R, {tuple.secret_L}, P);
-  MCc.POpen_Begin(opened_R, {tuple.secret_R}, P);
-  MCc.POpen_Begin(opened_R, {tuple.secret_challenges}, P);
-  MCc.POpen_Begin(opened_R, {tuple.secret_responses}, P);
-  /*
-      vector<CurveElement> opened_R;
-      if (opts.R_after_msg)
-          MCc.POpen_Begin(opened_R, {tuple.secret_R}, P);
-      T<CurveElement::Scalar> prod = tuple.b;
-      auto& protocol = proc->protocol;
-      if (proc)
-      {
-          protocol.prepare_mul(sk, tuple.a);
-          protocol.start_exchange();
-      }
-      if (opts.R_after_msg)
-      {
-          MCc.POpen_End(opened_R, {tuple.secret_R}, P);
-          tuple.R = opened_R[0];
-          if (opts.fewer_rounds)
-              tuple.R /= tuple.c;
-      }
-      if (proc)
-      {
-          protocol.stop_exchange();
-          prod = protocol.finalize_mul();
-      }
-      signature.R = tuple.R;
-      auto rx = tuple.R.x();
-      signature.s = MC.open(
-              tuple.a * hash_to_scalar(message, length) + prod * rx, P);
-      cout << "Minimal signing took " << timer.elapsed() * 1e3 << " ms and
-     sending "
-              << (P.sent - start) << " bytes" << endl;
-      auto diff = (P.comm_stats - stats);
-      diff.print(true);*/
+  if(opts.R_after_msg){
+    MCc.POpen_Begin(opened_R, {tuple.secret_R}, P);
+    MCc.POpen_Begin(opened_L, {tuple.secret_L}, P);
+  }
+//Lav L og R?
   return signature;
 }
 
@@ -237,39 +213,39 @@ void sign_benchmark(std::vector<RSIGTuple<T>> &tuples,
                     typename T<CurveElement::Scalar>::MAC_Check &MCp, Player &P,
                     RSIGOptions &opts,
                     SubProcessor<T<CurveElement::Scalar>> *proc = 0) {
+  unsigned char message[1024];
+
   auto test_keys = gen();
   SignatureTransaction *tx = genTransaction(get<2>(test_keys));
   typename T<CurveElement>::Direct_MC MCc(MCp.get_alphai());
   std::cout << "dddd" << std::endl;
 
   Bundle<octetStream> bundle(P);
-  P.Broadcast_Receive(bundle, true); // Broadcast and receive data to/from all
+  P.unchecked_broadcast(bundle);
+  //Bundle<octetStream> bundle(P);
+  //P.Broadcast_Receive(bundle, true); // Broadcast and receive data to/from all
                                      // players with eventual verification.
   Timer timer;
   timer.start();
-  auto stats = P.comm_stats;         // NamedCommStats ??
+  auto stats = P.total_comm();         // NamedCommStats ??
   CurveElement pk = MCc.open(sk, P); // maybe makes sk*G and broadcasts?
   MCc.Check(P);                      // no cloue
-  std::cout << "Public key gen took: " << timer.elapsed() * 1e3 << " ms"
-            << std::endl;
-  (P.comm_stats - stats).print(true); //??????
-  /*
+  std::cout << "Public key gen took: " << timer.elapsed() * 1e3 << " ms " << std::endl;
+  (P.total_comm() - stats).print(true); //??????
+
   for (size_t i = 0; i < min(10lu, tuples.size()); i++){
     check(sign(message, 1 << i, tuples[i], MCp, MCc, P, opts, pk, sk, proc),
   message, 1 << i, pk); if (not opts.check_open) continue; Timer timer;
     timer.start();
     auto& check_player = MCp.get_check_player(P);
-    auto stats = check_player.comm_stats;
-    auto start = check_player.sent;
+    auto stats = check_player.total_comm();
     MCp.Check(P); //MC*????
     MCc.Check(P);
-    cout << "Online checking took " << timer.elapsed() * 1e3 << " ms and sending
-  "
-        << (check_player.sent - start) << " bytes" << endl;
-    auto diff = (check_player.comm_stats - stats);
+    auto diff = (check_player.total_comm() - stats);
+    cout << "Online checking took " << timer.elapsed() * 1e3 << " ms and sending " << (diff.sent - start) << " bytes" << endl;
     diff.print();
   }
-*/
+
 }
 
 int main() {

@@ -27,8 +27,7 @@ std::vector<CurveElement::Scalar> genShares2(int n, CurveElement::Scalar value){
 
 
 
-CurveElement::Scalar eq_testing(CurveElement::Scalar share, int position, int index) {
-  cout << share << endl;
+CurveElement::Scalar eq_testing(int position, int index) {
   if(position == 0) {
      if(index != 0) {
         CurveElement::Scalar zero;
@@ -37,11 +36,11 @@ CurveElement::Scalar eq_testing(CurveElement::Scalar share, int position, int in
   } else {
     CurveElement::Scalar one = 1;
     eq_box.shares_of_one = genShares2(10, one);
-  } 
+  }
   }
     if(index != 0) {
-      return eq_box.zero_share.at(index - 1).at(position); 
-    } 
+      return eq_box.zero_share.at(index - 1).at(position);
+    }
     return eq_box.shares_of_one.at(position);
 
 }

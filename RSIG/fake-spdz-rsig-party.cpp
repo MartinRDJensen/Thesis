@@ -5,7 +5,7 @@
 #include "GC/VectorInput.h"
 
 #include "preprocessing.cpp"
-#include "sign.cpp"
+//#include "sign.cpp"
 #include "Protocols/Beaver.hpp"
 #include "Protocols/fake-stuff.hpp"
 #include "Protocols/Share.hpp"
@@ -19,18 +19,16 @@
 #include "GC/VectorProtocol.hpp"
 #include "GC/CcdPrep.hpp"
 #include "OT/NPartyTripleGenerator.hpp"
-
 #include <assert.h>
 
-int main(int argc, const char** argv)
-{
+int main(int argc, const char** argv){
     ez::ezOptionParser opt;
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
     int n_tuples = 1000;
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
-    PlainPlayer P(N, "ecdsa");
+    PlainPlayer P(N, "rsig");
     CurveElement::init();
 
     CurveElement::Scalar keyp;
@@ -49,8 +47,9 @@ int main(int argc, const char** argv)
     pShare sk, __;
     proc.DataF.get_two(DATA_INVERSE, sk, __);
 
-    vector<EcTuple<Share>> tuples;
-    preprocessing(tuples, n_tuples, sk, proc, opts);
-    check(tuples, sk, keyp, P);
-    sign_benchmark(tuples, sk, MCp, P, opts);
+    vector<RSIGTuple<Share>> tuples;
+    preprocessing(opts, proc, n_tuples);
+    //preprocessing(tuples, n_tuples, sk, proc, opts);
+    //check(tuples, sk, keyp, P);
+    //sign_benchmark(tuples, sk, MCp, P, opts);
 }

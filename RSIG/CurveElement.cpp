@@ -1,9 +1,5 @@
-/*
- * Element.cpp
- *
- */
 
-#include <ECDSA/CurveElement.h>
+#include "CurveElement.h"
 
 #include "Math/gfp.hpp"
 
@@ -98,7 +94,7 @@ CurveElement CurveElement::operator *(const Scalar& other) const
 }
 
 
-CurveElement CurveElement::new_add(const CurveElement& x, const CurveElement& y) 
+CurveElement CurveElement::new_add(const CurveElement& x, const CurveElement& y)
 {
     CurveElement res;
     crypto_core_ristretto255_scalar_add(res.a, x.a, y.a);
@@ -106,7 +102,7 @@ CurveElement CurveElement::new_add(const CurveElement& x, const CurveElement& y)
     return res;
 }
 
-CurveElement CurveElement::new_sub(const CurveElement& x, const CurveElement& y) 
+CurveElement CurveElement::new_sub(const CurveElement& x, const CurveElement& y)
 {
     CurveElement res;
     crypto_core_ristretto255_scalar_sub(res.a, x.a, y.a);
@@ -127,7 +123,7 @@ CurveElement CurveElement::new_mult(const CurveElement& x, const CurveElement& y
     return res;
 }
 
-CurveElement CurveElement::random_group_element() { 
+CurveElement CurveElement::random_group_element() {
     CurveElement tmp;
     crypto_core_ristretto255_random(tmp.a);
     tmp.check();
@@ -159,7 +155,7 @@ CurveElement CurveElement::base_mult(CurveElement& other) {
     return res;
 }
 
-CurveElement CurveElement::reduce() { 
+CurveElement CurveElement::reduce() {
     CurveElement res;
     crypto_core_ristretto255_scalar_reduce(res.a, a);
     return res;
