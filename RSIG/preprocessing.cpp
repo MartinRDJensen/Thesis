@@ -1,5 +1,5 @@
-#include "CurveElement.h"
-#include "RSIGOptions.h"
+#include "RSIG/CurveElement.h"
+#include "RSIG/RSIGOptions.h"
 #include "Processor/Data_Files.h"
 #include "Protocols/ReplicatedPrep.h"
 #include "Protocols/MaliciousShamirShare.h"
@@ -11,13 +11,13 @@
 #include "GC/CcdSecret.h"
 //#include "eq.cpp"
 
+
 template<template<class U> class T>
 class RSIGTuple{
 public:
   T<CurveElement::Scalar> secret_L;
+  T<CurveElement::Scalar> eq_bit_shares;
   T<CurveElement::Scalar> secret_R;
-  T<CurveElement::Scalar> secret_challenges;
-  T<CurveElement::Scalar> secret_responses;
 };
 
 /*template<template<class U> class T>
@@ -28,6 +28,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, int buffer_size,
 */
 template<template<class U> class T>
 void preprocessing(RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size){
+  std::cout << "IN PREPROCESSING" << std::endl;
   bool prep_mul = opts.prep_mul;
   std::cout << prep_mul << std::endl;
   Timer timer;
@@ -43,24 +44,53 @@ void preprocessing(RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc
 
   typedef T<typename CurveElement::Scalar> scalarShare;
   typedef T<CurveElement> pointShare;
-  CurveElement G(1);
   CurveElement hP;
+  CurveElement G(1);
   //outer vector index is party index
   //Inner vector index is PKSET index
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
-  std::vector<std::vector<scalarShare>> qs, ws, c;
+  std::vector<scalarShare> qs, ws;
+  for(int i = 0; i < 6; i++){
+    scalarShare q, w, _tmp;
+    scalarShare abe;
+    prep.get_three(DATA_TRIPLE, q, w, _tmp);
+    prep.get_one(N_DTYPE, abe);
+    std::cout << abe << std::endl;
+    qs.push_back(q);
+    ws.push_back(w);
+  }
+
+  auto res = qs.at(0);
+
+  std::cout << res << std::endl;
+  std::cout << buffer_size << std::endl;
+  //std::vector<std::vector<scalarShare>> qs, ws, c;
   //buffer size should be number of Pks
-  for(int i = 0; i < buffer_size; i++){
+ /* for(int i = 0; i < buffer_size; i++){
+    std::cout << "i = " << i << std::endl;
+    std::vector<scalarShare> tmp_qs;
+    std::vector<scalarShare> tmp_ws;
     for(int j = 0; j < 6; j ++){
+      std::cout << "j = " << j << std::endl;
       scalarShare q, w, _tmp;
       prep.get_three(DATA_TRIPLE, q, w, _tmp);
-      qs.at(j).push_back(q);
-      ws.at(j).push_back(w);
+      std::cout << "j = " << j << std::endl;
+      std::cout << "j = " << j << std::endl;
+      tmp_qs.push_back(q);
+      tmp_ws.push_back(w);
     }
-  }
+    qs.push_back(tmp_qs);
+    ws.push_back(tmp_ws);
+  }*/
+
+  //std::cout << G << std::endl;
+  //std::cout << G.operator*(res) << std::endl;
+
 }
+
+
 /*
   std::vector<std::vector<CurveElement::Scalar>> eq_box;
   for(int k = 0; k < 2; k++){
