@@ -33,14 +33,14 @@ void preprocessing(RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc
   std::cout << prep_mul << std::endl;
   Timer timer;
   timer.start();
-  //Player& P = proc.P;
+  Player& P = proc.P;
   auto& prep = proc.DataF;
   //size_t start = P.total_comm().sent;
   //auto stats = P.total_comm();
-  //auto& extra_player = P;
+  auto& extra_player = P;
 
  // auto& protocol = proc.protocol;
-  //auto& MCp = proc.MC;
+  auto& MCp = proc.MC;
 
   typedef T<typename CurveElement::Scalar> scalarShare;
   typedef T<CurveElement> pointShare;
@@ -51,19 +51,27 @@ void preprocessing(RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
+  vector<scalarShare> test;
+  scalarShare testt;
+  prep.get_one(DATA_BIT, testt);
+  test.push_back(testt);
+  cout << "test is: " << testt << endl;
+  vector<CurveElement::Scalar> haha;
+  MCp.POpen_Begin(haha, test, extra_player);
+  MCp.POpen_End(haha, test, extra_player);
+  std::cout << "opened: " << haha.at(0) << std::endl;
+
+  prep.buffer_triples();
   std::vector<scalarShare> qs, ws;
   for(int i = 0; i < 6; i++){
     scalarShare q, w, _tmp;
-    scalarShare abe;
     prep.get_three(DATA_TRIPLE, q, w, _tmp);
-    prep.get_one(N_DTYPE, abe);
-    std::cout << abe << std::endl;
     qs.push_back(q);
     ws.push_back(w);
   }
 
   auto res = qs.at(0);
-
+  cout << res * G << endl;
   std::cout << res << std::endl;
   std::cout << buffer_size << std::endl;
   //std::vector<std::vector<scalarShare>> qs, ws, c;
