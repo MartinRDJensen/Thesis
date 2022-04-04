@@ -50,7 +50,7 @@ SignatureTransaction::SignatureTransaction(int amount, CurveElement A, CurveElem
     auto r = SeededPRNG().get<CurveElement::Scalar>();
     CurveElement R = G.operator*(r);
     TX_pk = R;
-    
+
     //Computing D = Hs(rA)G + B
     CurveElement rA = A.operator*(r);
     unsigned char h[crypto_hash_sha512_BYTES];
@@ -77,3 +77,31 @@ void SignatureTransaction::sample_destination_keys(int n, BlockChain bc){
 unsigned char SignatureTransaction::convert(SignatureTransaction){
     return NULL;
 }*/
+
+SignatureTransaction *genTransaction(CurveElement I) {
+  auto key1 = gen();
+  auto destination_key1 = get<1>(key1);
+  auto key2 = gen();
+  auto destination_key2 = get<1>(key2);
+  //sender / receiver
+
+  BlockChain bc;
+  for (int i = 0; i < 10; i++) {
+    BlockChainTransaction tx(i);
+    tx.make_fake_tx();
+    bc.bc_add_transaction(tx);
+  }
+
+  SignatureTransaction *sign_tx = new SignatureTransaction(
+      1000, destination_key1, destination_key2, I);
+  sign_tx->sample_destination_keys(4, bc);
+
+  // Burde bruge dest og one time private key i stedet for
+  return sign_tx;
+}
+
+
+
+
+
+

@@ -31,4 +31,4 @@ bool Party::is_transaction_for_me(SignatureTransaction tx) {
 }
 void Party::include_new_transaction(CurveElement::Scalar x){
     wallet.push_back(x);
-} 
+}

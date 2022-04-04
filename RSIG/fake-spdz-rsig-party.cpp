@@ -8,6 +8,7 @@
 
 #include "RSIG/preprocessing.cpp"
 //#include "RSIG/sign.cpp"
+
 #include "Protocols/Beaver.hpp"
 #include "Protocols/fake-stuff.hpp"
 #include "Protocols/Share.hpp"
@@ -52,7 +53,12 @@ int main(int argc, const char** argv){
     vector<RSIGTuple<Share>> tuples;
     std::cout << n_tuples << std::endl;
     std::cout << n_tuples << std::endl;
-    preprocessing(opts, proc, n_tuples);
+
+    auto test_keys = gen();
+    SignatureTransaction *tx = genTransaction(get<2>(test_keys));
+    auto publicKeys = genPublicKeys(5, get<1>(test_keys));
+
+    preprocessing(tx, opts, proc, n_tuples, publicKeys);
     //preprocessing(tuples, n_tuples, sk, proc, opts);
     //check(tuples, sk, keyp, P);
     //sign_benchmark(tuples, sk, MCp, P, opts);

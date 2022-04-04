@@ -1,5 +1,5 @@
 #include "CurveElement.h"
-#include "RSIG/transaction.h"
+#include "transaction.h"
 #include <vector>
 
 

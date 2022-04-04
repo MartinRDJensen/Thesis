@@ -37,3 +37,6 @@ class SignatureTransaction{
         // NEEDED FOR HASHING LATER
         //static unsigned char convert(SignatureTransaction TX);
 };
+
+
+SignatureTransaction *genTransaction(CurveElement I);
