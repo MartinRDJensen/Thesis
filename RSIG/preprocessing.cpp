@@ -51,22 +51,20 @@ void preprocessing(SignatureTransaction* message, RSIGOptions opts, SubProcessor
   typedef T<typename CurveElement::Scalar> scalarShare;
   typedef T<CurveElement> pointShare;
   CurveElement G(1);
-
+  //auto& MCp = proc.MC;
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
-  vector<scalarShare> test;
-  scalarShare testt;
-  prep.get_one(DATA_BIT, testt);
-  auto abe = testt.get_share();
-  auto abemac = testt.get_mac();
-  auto abeG = G.operator*(abe);
-  std::cout << "abe is:" << abe << std::endl;
-  std::cout << "abe * G = " << abeG << std::endl;
-  pointShare ged;
+  vector<vector<scalarShare>> bitShares(1000);
+  for(int i = 0; i < buffer_size; i++){
+    for(int j = 0; j < 6; j++){
+      scalarShare bitShare;
+      prep.get_one(DATA_BIT, bitShare);
+      bitShares.at(i).push_back(bitShare);
+      cout << "I AM LOADING SHARES: " << bitShare << endl;
+    }
+  }
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
-  ged.set_share(abeG);
-  ged.set_mac(abemac);
 
   auto pksss = publicKeys.at(0);
   unsigned char h[crypto_hash_sha512_BYTES];
@@ -77,6 +75,8 @@ void preprocessing(SignatureTransaction* message, RSIGOptions opts, SubProcessor
   //r = [q]hP + [w](1-[b])I
 //  vector<vector<scalarShare>> wBs;
   for(int j = 0; j < buffer_size; j++){
+    cout << "NEW J: " << j << endl;
+    //auto shareOfOne =  scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
     for(int i = 0; i < 6; i++){
       scalarShare q, w, _tmp;
       prep.get_three(DATA_TRIPLE, q, w, _tmp);
@@ -84,9 +84,8 @@ void preprocessing(SignatureTransaction* message, RSIGOptions opts, SubProcessor
       //auto qMACs = q.get_mac();
       auto qG = G.operator*(qShares);
 
-      auto res = q + scalarShare::constant(1, MC->get_alphai());
-      cout << res << endl;
       //gang med mac?
+
       cout << qG;
       qs.at(j).push_back(q);
       ws.at(j).push_back(w);
