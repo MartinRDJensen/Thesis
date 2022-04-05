@@ -51,14 +51,12 @@ int main(int argc, const char** argv){
     pShare sk, __;
     proc.DataF.get_two(DATA_INVERSE, sk, __);
     vector<RSIGTuple<Share>> tuples;
-    std::cout << n_tuples << std::endl;
-    std::cout << n_tuples << std::endl;
 
     auto test_keys = gen();
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
 
-    preprocessing(tx, opts, proc, n_tuples, publicKeys);
+    preprocessing(tx, tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys));
     //preprocessing(tuples, n_tuples, sk, proc, opts);
     //check(tuples, sk, keyp, P);
     //sign_benchmark(tuples, sk, MCp, P, opts);
