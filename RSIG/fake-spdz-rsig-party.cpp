@@ -57,9 +57,10 @@ int main(int argc, const char** argv){
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
 
-    preprocessing(tx, tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys));
-  cout << "Calling sign bench" << endl;
-    sign_benchmark(tx, publicKeys, tuples, sk, MCp, P, proc);
+    preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys));
+    //check(tuples, sk, keyp, P);
+    
+    sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc);
     //preprocessing(tuples, n_tuples, sk, proc, opts);
     //check(tuples, sk, keyp, P);
     //sign_benchmark(tuples, sk, MCp, P, opts);

@@ -3,6 +3,8 @@
 #include "RSIG/util.h"
 #include "RSIG/transaction.h"
 
+
+
 #include "Processor/Data_Files.h"
 #include "Protocols/ReplicatedPrep.h"
 #include "Protocols/MaliciousShamirShare.h"
@@ -21,26 +23,22 @@ public:
   vector<T<CurveElement>> secret_L;
   vector<T<CurveElement::Scalar>> eq_bit_shares;
   vector<T<CurveElement>> secret_R;
+  vector<T<CurveElement::Scalar>> w_mul_const_sub_bit;
   vector<T<CurveElement::Scalar>> q_values;
   vector<T<CurveElement::Scalar>> w_values;
 };
 
-/*template<template<class U> class T>
-void preprocessing(vector<RSIGTuple<T>>& tuples, int buffer_size,
-        T<CurveElement::Scalar>& sk,
-        SubProcessor<T<CurveElement::Scalar>>& proc,
-        RSIGOptions opts){
-*/
 template<template<class U> class T>
-void preprocessing(SignatureTransaction* message, vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I){
+void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I){
+  std::cout << "IN PREPROCESSING" << std::endl;
   bool prep_mul = opts.prep_mul;
-  cout << "ignore " << message << prep_mul << endl;
+  std::cout << prep_mul << std::endl;
   Timer timer;
   timer.start();
   Player& P = proc.P;
   auto& prep = proc.DataF;
-  //size_t start = P.total_comm().sent;
-  //auto stats = P.total_comm();
+  size_t start = P.total_comm().sent;
+  auto stats = P.total_comm();
   auto& extra_player = P;
 
   auto& protocol = proc.protocol;
@@ -61,28 +59,23 @@ void preprocessing(SignatureTransaction* message, vector<RSIGTuple<T>>& tuples, 
       tuples.at(i).eq_bit_shares.push_back(bitShare);
     }
   }
-  cout << "here1" << endl;
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
-//  vector<vector<scalarShare>> wBs;
   auto shareOfOne =  scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
-
   for(int j = 0; j < buffer_size; j++){
     for(int i = 0; i < 6; i++){
       scalarShare q, w, _tmp;
       prep.get_three(DATA_TRIPLE, q, w, _tmp);
-      /*auto qShares = q.get_share();
-      //auto qMACs = q.get_mac();
-      auto qG = G.operator*(qShares);
-      pointShare qGShare;
-      qGShare.set_share(qG);
-      qGShare.set_mac(q.get_mac());//gang med mac?*/
       qs.at(j).push_back(q);
       ws.at(j).push_back(w);
     }
+    
     tuples.at(j).q_values = qs.at(j);
     tuples.at(j).w_values = ws.at(j);
+    
   }
+
+
   protocol.init_mul();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < 6; j++){
@@ -91,58 +84,78 @@ void preprocessing(SignatureTransaction* message, vector<RSIGTuple<T>>& tuples, 
   }
   protocol.start_exchange();
   protocol.stop_exchange();
-  cout << "just before" << endl;
   MCp.Check(extra_player);
-  cout << "after check 1" << endl;
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < 6; j ++){
       auto tmp = protocol.finalize_mul();
       w_mul_const_sub_b.at(i).push_back(tmp);
     }
+    tuples.at(i).w_mul_const_sub_bit = w_mul_const_sub_b.at(i);
   }
    //l = [q]G+[w](1-[b])P
   //r = [q]hP + [w](1-[b])I
-  cout << "Before last for loop" << endl;
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < 6; j++){
       auto qVal = qs.at(i).at(j).get_share();
       auto qMAC = qs.at(i).at(j).get_mac();
       auto qG = G.operator*(qVal);
-      auto qGMAC = G.operator*(qMAC);
       pointShare qGShare;
       qGShare.set_share(qG);
-      qGShare.set_mac(qGMAC);
+      qGShare.set_mac(G.operator*(qMAC));
       auto tmp = w_mul_const_sub_b.at(i).at(j);
       auto wconstShare = tmp.get_share();
       auto wconstMAC = tmp.get_mac();
       auto wConstP = publicKeys.at(j).operator*(wconstShare);
-      auto wConstPMAC = publicKeys.at(j).operator*(wconstMAC);
       pointShare stuffP;
       stuffP.set_share(wConstP);
-      stuffP.set_mac(wConstPMAC);
+      stuffP.set_mac(G.operator*(wconstMAC));
       auto roll = qGShare + stuffP;
-      cout << " ffge " << roll << endl;
+
+
       tuples.at(i).secret_L.push_back(roll);
 
-      cout << " fdsdfge " << roll << endl;
       unsigned char h[crypto_hash_sha512_BYTES];
       CurveElement::get_hash(h, publicKeys.at(j));
       CurveElement hP = CurveElement::hash_to_group(h);
 
       auto qhP = hP.operator*(qVal);
-      auto qhPMAC = hP.operator*(qMAC);
       pointShare qhPShare;
       qhPShare.set_share(qhP);
-      qhPShare.set_mac(qhPMAC);
+      qhPShare.set_mac(G.operator*(qMAC));
       auto wConstI = I.operator*(wconstShare);
-      auto wConstIMAC = I.operator*(wconstMAC);
       pointShare stuffI;
       stuffI.set_share(wConstI);
-      stuffI.set_mac(wConstIMAC);
+      stuffI.set_mac(G.operator*(wconstMAC));
       roll = qhPShare + stuffI;
       tuples.at(i).secret_R.push_back(roll);
+
+
     }
   }
-  cout << "After last for loop" << endl;
+  cout << "Done creating L and R " << endl;
+
+  timer.stop();
+    cout << "Generated " << buffer_size << " tuples in " << timer.elapsed()
+            << " seconds, throughput " << buffer_size / timer.elapsed() << ", "
+            << 1e-3 * (P.total_comm().sent - start) / buffer_size
+            << " kbytes per tuple" << endl;
+    (P.total_comm() - stats).print(true);
+
+
+
+
+   for(int i = 0; i < buffer_size; i++){
+    for(int j = 0; j < 6; j++){
+
+    }
+  }
+
+ for(int i = 0; i < buffer_size; i++){
+    for(int j = 0; j < 6; j++){
+
+    }
+  }
+
+
 }
 
