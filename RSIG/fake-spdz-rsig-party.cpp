@@ -7,7 +7,7 @@
 #include "GC/VectorInput.h"
 
 #include "RSIG/preprocessing.cpp"
-//#include "RSIG/sign.cpp"
+#include "RSIG/sign.cpp"
 
 #include "Protocols/Beaver.hpp"
 #include "Protocols/fake-stuff.hpp"
@@ -33,11 +33,12 @@ int main(int argc, const char** argv){
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
-    CurveElement::init();
 
+    CurveElement::init();
     CurveElement::Scalar keyp;
     typedef Share<CurveElement::Scalar> pShare;
-    string prefix = get_prep_sub_dir<pShare>(PREP_DIR "RSIG/", 2);
+
+     string prefix = get_prep_sub_dir<pShare>(PREP_DIR "RSIG/", 2);
     read_mac_key(prefix, N, keyp);
 
     DataPositions usage;
@@ -47,16 +48,18 @@ int main(int argc, const char** argv){
     BaseMachine machine;
     machine.ot_setups.push_back({P, false});
     SubProcessor<pShare> proc(_, MCp, prep, P);
-
+    vector<CurveElement::Scalar> tmp(1);
     pShare sk, __;
     proc.DataF.get_two(DATA_INVERSE, sk, __);
-    vector<RSIGTuple<Share>> tuples;
-
-    auto test_keys = gen();
+    vector<RSIGTuple<Share>> tuples(n_tuples);
+    auto test_keys = gen(10000);
+    sk.set_share(get<0>(test_keys));
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
 
     preprocessing(tx, tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys));
+  cout << "Calling sign bench" << endl;
+    sign_benchmark(tx, publicKeys, tuples, sk, MCp, P, proc);
     //preprocessing(tuples, n_tuples, sk, proc, opts);
     //check(tuples, sk, keyp, P);
     //sign_benchmark(tuples, sk, MCp, P, opts);

@@ -92,7 +92,10 @@ CurveElement CurveElement::operator *(const Scalar& other) const
     res.check();
     return res;
 }
-
+CurveElement operator*(const CurveElement::Scalar& x, const CurveElement& y)
+{
+    return y * x;
+}
 
 CurveElement CurveElement::new_add(const CurveElement& x, const CurveElement& y)
 {

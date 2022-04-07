@@ -33,16 +33,31 @@ CurveElement::Scalar hash_to_scalar(const unsigned char* h) {
 }
 
 
-std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen() {
+std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen(int skVal) {
+    cout << "yay did stuff" << endl;
+    CurveElement::Scalar sk = skVal;
+
     CurveElement::init();
-    auto sk = SeededPRNG().get<CurveElement::Scalar>();
+    cout << "yay did stuff" << endl;
+    cout << "yay did stuff" << endl;
+   // PRNG random(seed);
+    cout << "yay did stuff" << endl;
+    cout << "yay did stuff" << endl;
+    //auto sk = random.get<CurveElement::Scalar>();
+    cout << "ayyy we got a sk: " << sk << endl;
+    cout << "ayyy we got a sk: " << sk << endl;
+    cout << "ayyy we got a sk: " << sk << endl;
+    cout << "ayyy we got a sk: " << sk << endl;
+    cout << "ayyy we got a sk: " << sk << endl;
+    cout << "ayyy we got a sk: " << sk << endl;
+    //auto sk = SeededPRNG().get<CurveElement::Scalar>();
     CurveElement pk = G.operator*(sk);
 
     unsigned char h[crypto_hash_sha512_BYTES];
     CurveElement::get_hash(h, pk);
     CurveElement hP = CurveElement::hash_to_group(h);
     CurveElement I = hP.operator*(sk);
-
+    cout << "THE COMPUTED KEY IMAGE: " << I  << endl;
     /*
     cout << "From running gen() we get the following:" << endl;
     cout << "sk " << sk << endl;
@@ -57,7 +72,7 @@ std::vector<CurveElement> genPublicKeys(int n, CurveElement pk) {
   vector<CurveElement> publicKeys;
   publicKeys.push_back(pk);
   for (int i = 0; i < n; i++) {
-    auto tmp_keys = gen();
+    auto tmp_keys = gen(i+5);
     publicKeys.push_back(get<1>(tmp_keys));
   }
   return publicKeys;

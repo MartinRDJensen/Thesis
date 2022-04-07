@@ -1,5 +1,5 @@
 #include "CurveElement.h"
-#include "RSIG/ring_signature.h"
+#include "util.h"
 #include <vector>
 
 
@@ -11,7 +11,7 @@ class BlockChainTransaction{
         CurveElement destination_key;
         CurveElement key_image;
         BlockChainTransaction(int amount);
-        void make_fake_tx();
+        void make_fake_tx(int n);
 };
 
 class BlockChain{

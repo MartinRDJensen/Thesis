@@ -6,14 +6,14 @@ BlockChainTransaction::BlockChainTransaction(int amount)
 }
 
 
-void BlockChainTransaction::make_fake_tx(){
+void BlockChainTransaction::make_fake_tx(int n){
     /*
      *   JUST USED TO SPAWN FAKE PREVIOUS TRANSACTIONS
      *   WORKS AS WHEN THEY ARE MADE CORRECTLY THEN THE
      *   DESTINATION KEY IS SEEN AS D = xG, where
      *   x = Hs(aR) + b
      */
-    auto keys = gen();
+    auto keys = gen(n);
     destination_key = get<1>(keys);
     key_image = get<2>(keys);
 }
@@ -79,16 +79,16 @@ unsigned char SignatureTransaction::convert(SignatureTransaction){
 }*/
 
 SignatureTransaction *genTransaction(CurveElement I) {
-  auto key1 = gen();
+  auto key1 = gen(150);
   auto destination_key1 = get<1>(key1);
-  auto key2 = gen();
+  auto key2 = gen(300);
   auto destination_key2 = get<1>(key2);
   //sender / receiver
 
   BlockChain bc;
   for (int i = 0; i < 10; i++) {
     BlockChainTransaction tx(i);
-    tx.make_fake_tx();
+    tx.make_fake_tx(i+5);
     bc.bc_add_transaction(tx);
   }
 

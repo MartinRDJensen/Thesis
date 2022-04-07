@@ -15,6 +15,6 @@ int main()
     write_online_setup(prefix, CurveElement::Scalar::pr());
     generate_mac_keys<Share<CurveElement::Scalar>>(key, 2, prefix);
     make_mult_triples<Share<CurveElement::Scalar>>(key, 2, 6000, false, prefix);
-    make_inverse<Share<CurveElement::Scalar>>(key, 2, 6000, false, prefix);
+    make_sk_share<Share<CurveElement::Scalar>>(key, 2, 6000, prefix);
     make_bit<Share<CurveElement::Scalar>>(key, 2, 6000, false, prefix);
 }

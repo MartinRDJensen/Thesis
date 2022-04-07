@@ -46,7 +46,6 @@ public:
     static CurveElement new_mult(const CurveElement& x, const CurveElement& y);
     static CurveElement new_add(const CurveElement& x, const CurveElement& y);
     static CurveElement new_sub(const CurveElement& x, const CurveElement& y);
-    
     static CurveElement random_group_element();
     static CurveElement random_scalar_element();
     static CurveElement hash_to_group(unsigned char* h);
@@ -69,6 +68,7 @@ public:
     octetStream hash(size_t n_bytes) const;
 };
 
+CurveElement operator*(const CurveElement::Scalar& x, const CurveElement& y);
 ostream& operator<<(ostream& s, const CurveElement& x);
 
 #endif /* ECDSA_CURVEELEMENT_H_ */
