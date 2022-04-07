@@ -113,8 +113,10 @@ void preprocessing(SignatureTransaction* message, vector<RSIGTuple<T>>& tuples, 
       stuffP.set_share(wConstP);
       stuffP.set_mac(wconstMAC);
       auto roll = qGShare + stuffP;
+      cout << " ffge " << roll << endl;
       tuples.at(i).secret_L.push_back(roll);
 
+      cout << " fdsdfge " << roll << endl;
       unsigned char h[crypto_hash_sha512_BYTES];
       CurveElement::get_hash(h, publicKeys.at(j));
       CurveElement hP = CurveElement::hash_to_group(h);
