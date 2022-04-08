@@ -17,6 +17,8 @@
 //#include "eq.cpp"
 #include <typeinfo>
 
+#include <math.h>
+
 template<template<class U> class T>
 class RSIGTuple{
 public:
@@ -29,7 +31,7 @@ public:
 };
 
 template<template<class U> class T>
-void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I){
+void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s){
   
   bool prep_mul = opts.prep_mul;
   Timer timer;
@@ -49,15 +51,62 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
-  vector<vector<scalarShare>> bitShares(buffer_size);
+  vector<vector<vector<scalarShare>>> bitShares;
+  vector<vector<scalarShare>> rrShares(buffer_size);
+
+  cout << "s is " << s << endl;
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < 6; j++){
-      scalarShare bitShare;
-      prep.get_one(DATA_BIT, bitShare);
-      bitShares.at(i).push_back(bitShare);
-      tuples.at(i).eq_bit_shares.push_back(bitShare);
+      scalarShare _, r;
+      prep.get_two(DATA_INVERSE, _, r);
+      cout << "r is " << r << endl;
+      rrShares.at(i).push_back(r);
+      tuples.at(i).eq_bit_shares.push_back(r);
     }
   }
+
+  for(int i = 0; i < buffer_size; i++) {
+    vector<vector<scalarShare>> tmp;
+    for(int j = 0; j < 6; j++) {
+      vector<scalarShare> tmp1;
+      for(int k = 0; k < 40 ; k++) {
+        scalarShare bitShare;
+        prep.get_one(DATA_BIT, bitShare);
+        tmp1.push_back(bitShare);
+        //tuples.at(i).eq_bit_shares.push_back(bitShare);
+      }
+      tmp.push_back(tmp1);
+    }
+    bitShares.push_back(tmp);
+  }
+
+  vector<vector<scalarShare>> rShares(buffer_size);
+
+  for(int i = 0; i < buffer_size; i++) {
+    for(int j = 0; j < 6; j++) {
+      scalarShare r_prime;
+      for(int k = 0; k < 40; k++) {
+          CurveElement::Scalar two = (int) pow(2, k);
+          auto r = two * bitShares.at(i).at(j).at(k);
+          r_prime = r_prime + r; 
+      }
+      rShares.at(i).push_back(r_prime);
+    }
+  }
+
+  cout << "opjpojopjopjopjopjopj" << endl;
+  vector<vector<scalarShare>> cShares(buffer_size);
+  
+  for(int i = 0; i < buffer_size; i++) {
+    for(int j = 0; j < 6; j++) {
+      CurveElement::Scalar two = (int) pow(2, 40);
+      auto shareOfPos = scalarShare::constant(j, proc.P.my_num(), MCp.get_alphai());
+      auto c = (s - shareOfPos) + two * rrShares.at(i).at(j) + rShares.at(i).at(j);
+      cShares.at(i).push_back(c);
+    }
+  }
+
+
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
   auto shareOfOne =  scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
@@ -78,7 +127,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   protocol.init_mul();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < 6; j++){
-      protocol.prepare_mul(ws.at(i).at(j), shareOfOne - bitShares.at(i).at(j));
+      protocol.prepare_mul(ws.at(i).at(j), shareOfOne - tuples.at(i).eq_bit_shares.at(j));
     }
   }
   protocol.start_exchange();
