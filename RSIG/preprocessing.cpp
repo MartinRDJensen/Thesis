@@ -30,9 +30,8 @@ public:
 
 template<template<class U> class T>
 void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I){
-  std::cout << "IN PREPROCESSING" << std::endl;
+  
   bool prep_mul = opts.prep_mul;
-  std::cout << prep_mul << std::endl;
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -133,7 +132,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
 
     }
   }
-  cout << "Done creating L and R " << endl;
 
   timer.stop();
     cout << "Generated " << buffer_size << " tuples in " << timer.elapsed()
