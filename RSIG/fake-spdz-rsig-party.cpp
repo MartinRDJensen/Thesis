@@ -52,14 +52,16 @@ int main(int argc, const char** argv){
     pShare sk, __;
     proc.DataF.get_two(DATA_INVERSE, sk, __);
     vector<RSIGTuple<Share>> tuples(n_tuples);
-    auto test_keys = gen(10000);
-    sk.set_share(get<0>(test_keys));
+
+    // BEGIN FOR HIDING THE RECEIVER
+  //THEY DO HAVE THE SIGNER SECRET KEY IN test_keys WHICH IS NOT GOOD
+    auto test_keys = gen(100000);
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
-
+    // END FOR HIDING THE RECEIVER
     preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys));
     //check(tuples, sk, keyp, P);
-    
+
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc);
     //preprocessing(tuples, n_tuples, sk, proc, opts);
     //check(tuples, sk, keyp, P);

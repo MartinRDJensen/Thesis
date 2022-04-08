@@ -69,10 +69,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       qs.at(j).push_back(q);
       ws.at(j).push_back(w);
     }
-    
+
     tuples.at(j).q_values = qs.at(j);
     tuples.at(j).w_values = ws.at(j);
-    
+
   }
 
 
@@ -96,6 +96,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   //r = [q]hP + [w](1-[b])I
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < 6; j++){
+      cout << "PK" << j <<": " << publicKeys.at(j) << endl;
       auto qVal = qs.at(i).at(j).get_share();
       auto qMAC = qs.at(i).at(j).get_mac();
       auto qG = G.operator*(qVal);
@@ -140,22 +141,5 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
             << 1e-3 * (P.total_comm().sent - start) / buffer_size
             << " kbytes per tuple" << endl;
     (P.total_comm() - stats).print(true);
-
-
-
-
-   for(int i = 0; i < buffer_size; i++){
-    for(int j = 0; j < 6; j++){
-
-    }
-  }
-
- for(int i = 0; i < buffer_size; i++){
-    for(int j = 0; j < 6; j++){
-
-    }
-  }
-
-
 }
 

@@ -19,7 +19,7 @@ public:
 
 
 template<template<class U> class T>
-RingSignature<T> sign(SignatureTransaction *tx, 
+RingSignature<T> sign(SignatureTransaction *tx,
         //size_t length,
         RSIGTuple<T> tuple,
         typename T<CurveElement::Scalar>::MAC_Check& MCp,
@@ -44,35 +44,34 @@ RingSignature<T> sign(SignatureTransaction *tx,
 
     vector<CurveElement> opened_L;
     vector<CurveElement> opened_R;
-    
+
     MCc.POpen_Begin(opened_L, tuple.secret_L, P);
     MCc.POpen_End(opened_L, tuple.secret_L, P);
 
-  
-    MCc.POpen_Begin(opened_R, tuple.secret_R, P); 
-    MCc.POpen_End(opened_R, tuple.secret_R, P);  
-    
-    
+
+    MCc.POpen_Begin(opened_R, tuple.secret_R, P);
+    MCc.POpen_End(opened_R, tuple.secret_R, P);
+
+
     unsigned char* m = reinterpret_cast<unsigned char *>(tx);
-    
+
     CurveElement::Scalar c = crypto_hash(m, opened_L, opened_R);
-    
-    for(int i = 0 ; i < 6 ; i++) {
-      cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;  
+    cout << " challenge " << c << endl;
+
+  for(int i = 0 ; i < 6 ; i++) {
+      cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;
     }
 
-
     auto shareOfC =  scalarShare::constant(c, P.my_num(), MCp.get_alphai());
-    cout << " challenge " << c << endl;
     scalarShare w;
-    
+
     for(auto tmp : tuple.w_values) {
       w = w + tmp;
     }
-    
+
   protocol.init_mul();
   for(int i = 0; i < 6; i++) {
-    auto tmp = shareOfC - w + tuple.w_values.at(i); 
+    auto tmp = shareOfC - w + tuple.w_values.at(i);
     protocol.prepare_mul(tmp, tuple.eq_bit_shares.at(i));
 
   }
@@ -85,8 +84,7 @@ RingSignature<T> sign(SignatureTransaction *tx,
     challenges.push_back(tmp);
   }
 
-
-  vector<scalarShare> responses;
+    vector<scalarShare> responses;
   protocol.init_mul();
   for(int i = 0; i < 6; i++) {
     protocol.prepare_mul(sk, tuple.eq_bit_shares.at(i));
@@ -117,8 +115,8 @@ RingSignature<T> sign(SignatureTransaction *tx,
   cout << " end of sign" << endl;
   return signature;
 }
-    
-template<template<class U> class T>   
+
+template<template<class U> class T>
 bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<CurveElement> publicKeys, Player& P, typename T<CurveElement::Scalar>::MAC_Check& MCp)
 {
     Timer timer;
@@ -132,14 +130,17 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
     MCp.POpen_Begin(opened_c, signature.challenges, P);
     MCp.POpen_End(opened_c, signature.challenges, P);
 
-  
-    MCp.POpen_Begin(opened_r, signature.responses, P); 
-    MCp.POpen_End(opened_r, signature.responses, P);  
-    
+
+    MCp.POpen_Begin(opened_r, signature.responses, P);
+    MCp.POpen_End(opened_r, signature.responses, P);
+
 
   std::vector<CurveElement> R;
   std::vector<CurveElement> L;
-
+  for(auto var : publicKeys)
+  {
+    cout << "PK: " << var << endl;
+  }
   for (vector<int>::size_type i = 0; i < publicKeys.size(); i++) {
     CurveElement rG = generator.operator*(opened_r.at(i));
     CurveElement cP = publicKeys.at(i).operator*(opened_c.at(i));
@@ -157,7 +158,7 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
   CurveElement::Scalar challenge_prime = crypto_hash(m, L, R);
 
   for(int i = 0 ; i < 6 ; i++) {
-      cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;  
+      cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;
     }
 
 
@@ -176,15 +177,15 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
 
 template<template<class U> class T>
 void sign_benchmark(SignatureTransaction* message,
-        vector<RSIGTuple<T>>& tuples, 
+        vector<RSIGTuple<T>>& tuples,
          T<CurveElement::Scalar> sk,
         CurveElement I,
-        std::vector<CurveElement> publicKeys, 
+        std::vector<CurveElement> publicKeys,
         typename T<CurveElement::Scalar>::MAC_Check& MCp, Player& P,
         SubProcessor<T<CurveElement::Scalar>>& proc
         )
 {
-   
+
     typename T<CurveElement>::Direct_MC MCc(MCp.get_alphai());
 
     // synchronize
@@ -193,10 +194,10 @@ void sign_benchmark(SignatureTransaction* message,
     Timer timer;
     timer.start();
     auto stats = P.total_comm();
- 
+
     for (size_t i = 0; i < min(10lu, tuples.size()); i++)
-    { 
-        
+    {
+
         check(sign(message, tuples[i], MCp, MCc, P, sk, I, proc), message, publicKeys, P, MCp);
         /*
         if (not opts.check_open)
