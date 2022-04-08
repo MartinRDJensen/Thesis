@@ -18,6 +18,7 @@ public:
 
 
 
+
 template<template<class U> class T>
 RingSignature<T> sign(SignatureTransaction *tx, 
         //size_t length,
@@ -101,20 +102,19 @@ RingSignature<T> sign(SignatureTransaction *tx,
 
   protocol.init_mul();
   for(int i = 0; i < 6; i++) {
-    protocol.prepare_mul(responses.at(i), tuple.eq_bit_shares.at(i));
+    protocol.prepare_mul(responses.at(i), challenges.at(i));
   }
 
   protocol.start_exchange();
   protocol.stop_exchange();
   for(int i = 0; i < 6; i++) {
     auto tmp = protocol.finalize_mul();
-    responses.at(i) = tmp;
+    responses.at(i) = tuple.q_values.at(i) -  tmp;
   }
 
   signature.challenges = challenges;
   signature.responses = responses;
   signature.keyImage = I;
-  cout << " end of sign" << endl;
   return signature;
 }
     
@@ -163,7 +163,7 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
 
   CurveElement::Scalar rebuildChallenge;
   for (vector<int>::size_type i = 0; i < publicKeys.size(); i++) {
-    rebuildChallenge = rebuildChallenge + opened_r.at(i);
+    rebuildChallenge = rebuildChallenge + opened_c.at(i);
   }
   cout << "Final verification check becomes" << endl;
   cout << challenge_prime << "=?=" << rebuildChallenge << endl;

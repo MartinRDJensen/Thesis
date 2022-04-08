@@ -14,6 +14,7 @@ CurveElement::Scalar crypto_hash(unsigned char *m,
     if (i < L.size()) {
       crypto_hash_sha512_update(
           &state, L.at(i).get(),
+          sizeof(L_prime.at(i)));
           crypto_core_ristretto255_BYTES); // sizeof(L_prime.at(i)));
     } else {
       crypto_hash_sha512_update(
@@ -22,6 +23,7 @@ CurveElement::Scalar crypto_hash(unsigned char *m,
     }
   }
   crypto_hash_sha512_final(&state, out);
+  cout << "out is " << out << endl;
   CurveElement::Scalar res = hash_to_scalar(out);
   return res;
 }
@@ -34,22 +36,11 @@ CurveElement::Scalar hash_to_scalar(const unsigned char* h) {
 
 
 std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen(int skVal) {
-    cout << "yay did stuff" << endl;
     CurveElement::Scalar sk = skVal;
 
     CurveElement::init();
-    cout << "yay did stuff" << endl;
-    cout << "yay did stuff" << endl;
    // PRNG random(seed);
-    cout << "yay did stuff" << endl;
-    cout << "yay did stuff" << endl;
     //auto sk = random.get<CurveElement::Scalar>();
-    cout << "ayyy we got a sk: " << sk << endl;
-    cout << "ayyy we got a sk: " << sk << endl;
-    cout << "ayyy we got a sk: " << sk << endl;
-    cout << "ayyy we got a sk: " << sk << endl;
-    cout << "ayyy we got a sk: " << sk << endl;
-    cout << "ayyy we got a sk: " << sk << endl;
     //auto sk = SeededPRNG().get<CurveElement::Scalar>();
     CurveElement pk = G.operator*(sk);
 
@@ -57,7 +48,6 @@ std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen(int skVal) {
     CurveElement::get_hash(h, pk);
     CurveElement hP = CurveElement::hash_to_group(h);
     CurveElement I = hP.operator*(sk);
-    cout << "THE COMPUTED KEY IMAGE: " << I  << endl;
     /*
     cout << "From running gen() we get the following:" << endl;
     cout << "sk " << sk << endl;
