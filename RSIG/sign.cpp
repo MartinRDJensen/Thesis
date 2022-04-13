@@ -53,6 +53,14 @@ RingSignature<T> sign(SignatureTransaction *tx,
     MCc.POpen_Begin(opened_R, tuple.secret_R, P); 
     MCc.POpen_End(opened_R, tuple.secret_R, P);  
     
+    vector<CurveElement::Scalar> opened_bit;
+    
+    MCp.POpen_Begin(opened_bit, tuple.eq_bit_shares, P);
+    MCp.POpen_End(opened_bit, tuple.eq_bit_shares, P);
+
+    for(auto x : opened_bit) {
+      cout << "bit is: " << x << endl;
+    }
     
     unsigned char* m = reinterpret_cast<unsigned char *>(tx);
     
