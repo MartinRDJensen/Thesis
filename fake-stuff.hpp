@@ -534,11 +534,7 @@ void make_bit(const typename T::mac_type& key, int N, int ntrip, bool zero, stri
 
   for(int i = 0; i < ntrip; i++){
     if(!zero){
-      if(i % 6 == 0){
-        files.output_shares(1);
-      }else {
-        files.output_shares(0);
-      }
+      files.output_shares(rand() % 2);
     }
   }
 }
@@ -550,8 +546,14 @@ void make_sk_share(const typename T::mac_type& key, int N, int ntrip,
   typename T::clear a,b;
   for (int i=0; i<ntrip; i++)
     {
-     files.output_shares(100000);
-      files.output_shares(100);
+      if(i == 0) {
+        files.output_shares(100000);
+        files.output_shares(0);
+      } else {
+        files.output_shares(100000); //whatever
+        files.output_shares(SeededPRNG().get<CurveElement::Scalar>());
+      }
+     
     }
   check_files(files.outf, N);
 }

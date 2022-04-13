@@ -29,7 +29,7 @@ int main(int argc, const char** argv){
     ez::ezOptionParser opt;
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
-    int n_tuples = 1000;
+    int n_tuples = 10;
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -49,8 +49,8 @@ int main(int argc, const char** argv){
     machine.ot_setups.push_back({P, false});
     SubProcessor<pShare> proc(_, MCp, prep, P);
     vector<CurveElement::Scalar> tmp(1);
-    pShare sk, __;
-    proc.DataF.get_two(DATA_INVERSE, sk, __);
+    pShare sk, s;
+    proc.DataF.get_two(DATA_INVERSE, sk, s);
     vector<RSIGTuple<Share>> tuples(n_tuples);
 
     // BEGIN FOR HIDING THE RECEIVER
@@ -58,8 +58,7 @@ int main(int argc, const char** argv){
     auto test_keys = gen(100000);
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
-    // END FOR HIDING THE RECEIVER
-    preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys));
+    preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys), s);
     //check(tuples, sk, keyp, P);
 
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc);

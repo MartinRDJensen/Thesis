@@ -52,6 +52,8 @@ public:
     static CurveElement hash_to_group(unsigned char* h);
     static CurveElement base_mult(CurveElement& other);
 
+    static CurveElement::Scalar modulos(const Scalar& a, const Scalar& b);
+
     CurveElement reduce();
 
     CurveElement& operator+=(const CurveElement& other);

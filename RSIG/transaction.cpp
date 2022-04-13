@@ -94,7 +94,16 @@ SignatureTransaction *genTransaction(CurveElement I) {
   auto key2 = gen(300);
   auto destination_key2 = get<1>(key2);
   //sender / receiver
-
+/*
+    CurveElement::Scalar mtmp = get<0>(key1);
+  CurveElement::Scalar div = 2;
+  CurveElement::Scalar z = 0;
+  for(int i = 0; i < 100; i++){
+    auto rem = CurveElement::modulos(mtmp, div);
+    mtmp = mtmp / div;
+    //cout << "Rem: " << rem << ", mtmp: " << mtmp << endl;
+  }
+*/
   BlockChain bc;
   for (int i = 0; i < 10; i++) {
     BlockChainTransaction tx(i);

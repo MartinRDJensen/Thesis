@@ -28,6 +28,13 @@ void CurveElement::convert(unsigned char* res, const Scalar& other)
     memcpy(res, tmp.__get_mp()->_mp_d, abs(tmp.__get_mp()->_mp_size) * sizeof(mp_limb_t));
 }
 
+CurveElement::Scalar CurveElement::modulos(const Scalar& abe, const Scalar& b){
+  CurveElement::Scalar res;
+  res = abe - (b * (abe/b));
+  return res;
+  //a % b = a - (b * int(a/b))
+}
+
 CurveElement::CurveElement()
 {
     memcpy(a, zero, sizeof(a));
