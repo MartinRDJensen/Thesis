@@ -14,7 +14,6 @@ CurveElement::Scalar crypto_hash(unsigned char *m,
     if (i < L.size()) {
       crypto_hash_sha512_update(
           &state, L.at(i).get(),
-          sizeof(L_prime.at(i)));
           crypto_core_ristretto255_BYTES); // sizeof(L_prime.at(i)));
     } else {
       crypto_hash_sha512_update(

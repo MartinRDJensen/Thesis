@@ -92,6 +92,16 @@ CurveElement CurveElement::operator *(const Scalar& other) const
     res.check();
     return res;
 }
+
+CurveElement::Scalar CurveElement::modulos(const Scalar& abe, const Scalar& b){
+  CurveElement::Scalar ress;
+  auto res = bigint(abe) % 2;
+  cout << bigint(abe) << " % " << b << " = " << res  << endl;
+  return ress;
+  //c-(c/m*m)
+  //a % b = a - (b * int(a/b))
+}
+
 CurveElement operator*(const CurveElement::Scalar& x, const CurveElement& y)
 {
     return y * x;

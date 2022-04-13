@@ -137,10 +137,6 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
 
   std::vector<CurveElement> R;
   std::vector<CurveElement> L;
-  for(auto var : publicKeys)
-  {
-    cout << "PK: " << var << endl;
-  }
   for (vector<int>::size_type i = 0; i < publicKeys.size(); i++) {
     CurveElement rG = generator.operator*(opened_r.at(i));
     CurveElement cP = publicKeys.at(i).operator*(opened_c.at(i));

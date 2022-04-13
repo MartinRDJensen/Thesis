@@ -42,6 +42,7 @@ public:
     CurveElement operator+(const CurveElement& other) const;
     CurveElement operator-(const CurveElement& other) const;
     CurveElement operator*(const Scalar& other) const;
+    static CurveElement::Scalar modulos(const Scalar& a, const Scalar& b);
     static void get_hash(unsigned char* out, CurveElement to_hash);
     static CurveElement new_mult(const CurveElement& x, const CurveElement& y);
     static CurveElement new_add(const CurveElement& x, const CurveElement& y);
