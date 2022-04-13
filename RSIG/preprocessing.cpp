@@ -16,6 +16,7 @@
 #include "GC/CcdSecret.h"
 //#include "eq.cpp"
 #include <typeinfo>
+#include <bitset>
 
 #include <math.h>
 
@@ -46,7 +47,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   auto& MCp = proc.MC;
   typedef T<typename CurveElement::Scalar> scalarShare;
   typedef T<CurveElement> pointShare;
-  //typename pointShare::Direct_MC MCc(MCp.get_alphai());
+  typename pointShare::Direct_MC MCc(MCp.get_alphai());
   CurveElement G(1);
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
@@ -54,12 +55,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
 
-  cout << "s is " << s << endl;
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < 6; j++){
       scalarShare _, r;
       prep.get_two(DATA_INVERSE, _, r);
-      cout << "r is " << r << endl;
       rrShares.at(i).push_back(r);
       tuples.at(i).eq_bit_shares.push_back(r);
     }
@@ -105,6 +104,43 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       cShares.at(i).push_back(c);
     }
   }
+
+  vector<vector<CurveElement::Scalar>> c_opened(buffer_size);
+
+  for(int i = 0; i < buffer_size; i++) {
+    MCp.POpen_Begin(c_opened.at(i), cShares.at(i), extra_player);
+    MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
+  }
+
+/*
+  for(int i = 0; i < buffer_size; i++) {
+    for(int j = 0; j < 6; j++) {
+
+    }
+  }
+*/
+  vector<CurveElement::Scalar> noget;
+  cout << "poinklmkopåji " << c_opened.at(0).at(0) << endl;
+  CurveElement::Scalar tt = 2;
+  cout << "poinklmkopåji " << c_opened.at(0).at(0) / tt << endl;
+  auto aa = c_opened.at(0).at(0) / tt; 
+  aa = aa / tt;
+
+  cout << "poinklmkopåji " << (c_opened.at(0).at(0) / tt) * tt << endl;
+  if((c_opened.at(0).at(0) / tt) * tt == c_opened.at(0).at(0)) {
+    cout << 0 << endl;
+  } else {
+    cout << 1 << endl;
+  }
+
+  
+
+  /*
+  std::bitset<40> b(4); //convent number into bit array
+  std::bitset<64> bb(c_opened.at(0).at(0)); //convent number into bit array
+  std::cout << "40 bits is " <<  b << std::endl;
+  std::cout << "64 bits is " <<  bb << std::endl;
+  */
 
 
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
