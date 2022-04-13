@@ -275,25 +275,5 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
             << 1e-3 * (P.total_comm().sent - start) / buffer_size
             << " kbytes per tuple" << endl;
     (P.total_comm() - stats).print(true);
-<<<<<<< HEAD
-=======
-
-
-
-
-   for(int i = 0; i < buffer_size; i++){
-    for(int j = 0; j < number_of_parties; j++){
-
-    }
-  }
-
- for(int i = 0; i < buffer_size; i++){
-    for(int j = 0; j < number_of_parties; j++){
-
-    }
-  }
-
-
->>>>>>> 97dd21b4d83e271f4f80c15ec5069d445f492daf
 }
 
