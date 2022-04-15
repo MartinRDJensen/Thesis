@@ -551,7 +551,9 @@ void make_sk_share(const typename T::mac_type& key, int N, int ntrip,
         files.output_shares(0);
       } else {
         files.output_shares(100000); //whatever
-        files.output_shares(SeededPRNG().get<CurveElement::Scalar>());
+        auto tmp = SeededPRNG().get<CurveElement::Scalar>();
+
+        files.output_shares(rand() % 10000);
       }
      
     }
