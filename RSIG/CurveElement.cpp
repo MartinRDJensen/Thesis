@@ -172,6 +172,10 @@ CurveElement& CurveElement::operator +=(const CurveElement& other)
     return *this;
 }
 
+CurveElement& CurveElement::operator /=(const Scalar& other){
+  *this = *this * other.invert();
+  return *this;
+}
 bool CurveElement::operator ==(const CurveElement& other) const
 {
     for (size_t i = 0; i < sizeof a; i++)

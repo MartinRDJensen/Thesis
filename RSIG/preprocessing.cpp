@@ -55,12 +55,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
 
-  cout << "s is " << s << endl;
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
       scalarShare _, r;
       prep.get_two(DATA_INVERSE, _, r);
-      //cout << "r is " << r << endl;
       rrShares.at(i).push_back(r);
     }
   }
@@ -94,14 +92,11 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
           auto r = two * bitShares.at(i).at(j).at(k);
           r_prime = r_prime + r;
       }
-      cout << "r_prime " << r_prime << endl;
       rShares.at(i).push_back(r_prime);
     }
   }
 
   vector<vector<scalarShare>> cShares(buffer_size);
-
- 
 
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
@@ -131,9 +126,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   for(int i = 0; i < buffer_size; i++) {
     MCp.POpen_Begin(c_opened.at(i), cShares.at(i), extra_player);
     MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
+    cout << "i: " << i << endl;
+    MCp.Check(extra_player);
+    cout << "i: " << i << endl;
   }
-
-
 
   vector<vector<vector<CurveElement::Scalar>>> c_bits;
 
@@ -141,7 +137,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     vector<vector<CurveElement::Scalar>> tmp;
     for(int j = 0; j < number_of_parties; j++) {
       bigint val(c_opened.at(i).at(j));
-      cout << "val is " << val << " other is  " << c_opened.at(i).at(j) << endl;
       vector<CurveElement::Scalar> tmp1;
       for(int k = 0; k < 40 ; k++) {
         CurveElement::Scalar s;
@@ -164,19 +159,12 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
       for(int k = 0; k < 40; k++) {
-        protocol.init_mul();
         CurveElement::Scalar two = 2;
         auto r = bitShares.at(i).at(j).at(k);
-        /*
-        protocol.prepare_mul(r, r);
-        protocol.start_exchange();
-        protocol.stop_exchange();
-        auto d = r + r - two * protocol.finalize_mul();
-        */
-        
+
         auto c = scalarShare::constant(c_bits.at(i).at(j).at(k), proc.P.my_num(), MCp.get_alphai());
         auto d = c + r - two * (c_bits.at(i).at(j).at(k) * r);
-        
+
         d_bits.at(i).at(j).at(k) = d;
       }
     }
@@ -185,60 +173,23 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   vector<vector<scalarShare>> z(buffer_size);
 
   for(int i = 0; i < buffer_size; i++) {
-    cout << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare sum;
-      /*
-      auto shareOfOne =  scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
-      for(int k = 0; k < 40; k++) {
-        sum = sum + d_bits.at(i).at(j).at(k);
-      }
-      sum = sum + shareOfOne;
-      vector<scalarShare> tmp;
-
-      for(int k = 0; k < 40; k++) {
-        if(k == 0) {
-          tmp.push_back(shareOfOne);
-        } else {
-          protocol.prepare_mul(tmp.at(i - 1), shareOfOne);
-          protocol.start_exchange();
-          protocol.stop_exchange();
-          tmp.push_back(protocol.finalize_mul);
-        }
-      }
-*/
-      
       auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
         protocol.start_exchange();
         protocol.stop_exchange();
+        protocol.check();
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
       }
-      
+
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
-      //z.at(i).push_back(r);
     }
   }
-
-  for(int i = 0; i < buffer_size; i++) {
-        vector<CurveElement::Scalar> d_opened;
-        MCp.POpen_Begin(d_opened, tuples.at(i).eq_bit_shares, extra_player);
-        MCp.POpen_End(d_opened, tuples.at(i).eq_bit_shares, extra_player);
-      for(auto x : d_opened) {
-        cout << "z is " << x << endl;
-      }
-  }
-
-  /*
-  bigint bbb(c_opened.at(0).at(0));
-  std::cout << "  " <<  bbb % 2 << std::endl;
-  std::cout << " " <<  (bbb / 2) % 2 << std::endl;
-  */
-
 
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
@@ -265,7 +216,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
   protocol.start_exchange();
   protocol.stop_exchange();
-  MCp.Check(extra_player);
+  protocol.check();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j ++){
       auto tmp = protocol.finalize_mul();
@@ -273,8 +224,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
     tuples.at(i).w_mul_const_sub_bit = w_mul_const_sub_b.at(i);
   }
-   //l = [q]G+[w](1-[b])P
-  //r = [q]hP + [w](1-[b])I
+
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
       auto qVal = qs.at(i).at(j).get_share();
@@ -289,9 +239,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       auto wConstP = publicKeys.at(j).operator*(wconstShare);
       pointShare stuffP;
       stuffP.set_share(wConstP);
-      stuffP.set_mac(G.operator*(wconstMAC));
+      stuffP.set_mac(publicKeys.at(j).operator*(wconstMAC));
       auto roll = qGShare + stuffP;
-
 
       tuples.at(i).secret_L.push_back(roll);
 
@@ -302,15 +251,13 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       auto qhP = hP.operator*(qVal);
       pointShare qhPShare;
       qhPShare.set_share(qhP);
-      qhPShare.set_mac(G.operator*(qMAC));
+      qhPShare.set_mac(hP.operator*(qMAC));
       auto wConstI = I.operator*(wconstShare);
       pointShare stuffI;
       stuffI.set_share(wConstI);
-      stuffI.set_mac(G.operator*(wconstMAC));
+      stuffI.set_mac(I.operator*(wconstMAC));
       roll = qhPShare + stuffI;
       tuples.at(i).secret_R.push_back(roll);
-
-
     }
   }
 

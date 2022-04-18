@@ -25,7 +25,7 @@ private:
 public:
     typedef void next;
     typedef void Square;
-
+    static const true_type invertible;
     static int size() { return sizeof(a); }
     static string type_string() { return "Curve25519"; }
 
@@ -42,6 +42,10 @@ public:
     CurveElement operator+(const CurveElement& other) const;
     CurveElement operator-(const CurveElement& other) const;
     CurveElement operator*(const Scalar& other) const;
+
+    CurveElement& operator+=(const CurveElement& other);
+    CurveElement& operator/=(const Scalar& other);
+
     static void get_hash(unsigned char* out, CurveElement to_hash);
     static CurveElement new_mult(const CurveElement& x, const CurveElement& y);
     static CurveElement new_add(const CurveElement& x, const CurveElement& y);
@@ -53,22 +57,21 @@ public:
 
     CurveElement reduce();
 
-    CurveElement& operator+=(const CurveElement& other);
-
     bool operator==(const CurveElement& other) const;
     bool operator!=(const CurveElement& other) const;
 
-    void assign_zero() { *this = 0; }
-    bool is_zero() { return *this == 0; }
+    void assign_zero() { *this = {}; }
+    bool is_zero() { return *this == CurveElement(); }
     void add(octetStream& os) { *this += os.get<CurveElement>(); }
 
     void pack(octetStream& os) const;
     void unpack(octetStream& os);
 
     octetStream hash(size_t n_bytes) const;
+
+    friend ostream& operator<<(ostream& s, const CurveElement& x);
 };
 
 CurveElement operator*(const CurveElement::Scalar& x, const CurveElement& y);
-ostream& operator<<(ostream& s, const CurveElement& x);
 
 #endif /* ECDSA_CURVEELEMENT_H_ */
