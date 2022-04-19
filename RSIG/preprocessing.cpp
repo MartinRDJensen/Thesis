@@ -126,9 +126,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   for(int i = 0; i < buffer_size; i++) {
     MCp.POpen_Begin(c_opened.at(i), cShares.at(i), extra_player);
     MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
-    cout << "i: " << i << endl;
     MCp.Check(extra_player);
-    cout << "i: " << i << endl;
   }
 
   vector<vector<vector<CurveElement::Scalar>>> c_bits;

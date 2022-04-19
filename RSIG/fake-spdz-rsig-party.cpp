@@ -29,7 +29,7 @@ int main(int argc, const char** argv){
     ez::ezOptionParser opt;
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
-    int n_tuples = 1;
+    int n_tuples = 100;
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");

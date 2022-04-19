@@ -58,32 +58,25 @@ RingSignature<T> sign(SignatureTransaction *tx,
 
     unsigned char* m = reinterpret_cast<unsigned char *>(tx);
     CurveElement::Scalar c = crypto_hash(m, opened_L, opened_R);
-    cout << " challenge " << c << endl;
 
-    for(int i = 0 ; i < 6 ; i++) {
-      cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;
-    }
-
+    // for(int i = 0 ; i < 6 ; i++) {
+    //   cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;
+    // }
     auto shareOfC =  scalarShare::constant(c, P.my_num(), MCp.get_alphai());
     scalarShare w;
-    MCp.Check(P);
     for(auto tmp : tuple.w_values) {
       w = w + tmp;
     }
-
   protocol.init_mul();
   for(int i = 0; i < 6; i++) {
-    auto tmp = shareOfC - w + tuple.w_values.at(i);
-    protocol.prepare_mul(tmp, tuple.eq_bit_shares.at(i));
+    auto res = shareOfC - w+tuple.w_values.at(i);
+    protocol.prepare_mul(res, tuple.eq_bit_shares.at(i));
   }
 
-  protocol.start_exchange();
-  protocol.stop_exchange();
-  cout << "start of protocolcheck" << endl;
-  cout << "start of protocolcheck" << endl;
+  //protocol.start_exchange();
+  //protocol.stop_exchange();
+  protocol.exchange();
   protocol.check();
-  cout << "after start of protocolcheck" << endl;
-  cout << "after start of protocolcheck" << endl;
   vector<scalarShare> challenges;
   for(int i = 0; i < 6; i++) {
     auto tmp = protocol.finalize_mul() + tuple.w_mul_const_sub_bit.at(i);
@@ -159,17 +152,17 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
   CurveElement::Scalar challenge_prime = crypto_hash(m, L, R);
 
   for(int i = 0 ; i < 6 ; i++) {
-      cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;
-    }
+      // cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;
+  }
 
 
   CurveElement::Scalar rebuildChallenge;
   for (vector<int>::size_type i = 0; i < publicKeys.size(); i++) {
     rebuildChallenge = rebuildChallenge + opened_c.at(i);
   }
-  cout << "Final verification check becomes" << endl;
-  cout << challenge_prime << "=?=" << rebuildChallenge << endl;
-  //assert(challenge_prime.operator==(rebuildChallenge));
+  // cout << "Final verification check becomes" << endl;
+  // cout << challenge_prime << "=?=" << rebuildChallenge << endl;
+  assert(challenge_prime.operator==(rebuildChallenge));
 
   std::cout << "Offline checking took: " << timer.elapsed() * 1e3 << " ms. "
             << std::endl;
@@ -196,8 +189,7 @@ void sign_benchmark(SignatureTransaction* message,
     Timer timer;
     timer.start();
     auto stats = P.total_comm();
-    cout << "wee are in sign_benchmark" << endl;
-    for (size_t i = 0; i < min(10lu, tuples.size()); i++)
+    for (size_t i = 0; i < max(10lu, tuples.size()); i++)
     {
 
         check(sign(message, tuples[i], MCp, MCc, P, sk, I, proc), message, publicKeys, P, MCp);
@@ -205,7 +197,6 @@ void sign_benchmark(SignatureTransaction* message,
         timer.start();
         auto& check_player = MCp.get_check_player(P);
         auto stats = check_player.total_comm();
-        cout << "after stuff checks " << i << endl;
         MCp.Check(P);
         MCc.Check(P);
         auto diff = (check_player.total_comm() - stats);
