@@ -8,7 +8,7 @@
 
 int main()
 {
-    CurveElement::init();
+        CurveElement::init();
     CurveElement::Scalar key;
     string prefix = PREP_DIR "RSIG/";
     mkdir_p(prefix.c_str());

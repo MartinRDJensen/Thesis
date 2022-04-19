@@ -538,6 +538,21 @@ void make_bit(const typename T::mac_type& key, int N, int ntrip, bool zero, stri
     }
   }
 }
+
+bigint sk_share_helper(int k){
+  vector<int> bits;
+  for(int i = 0; i < k; i++){
+    bits.push_back(rand() % 2);
+  }
+  bigint res = 0;
+  bigint base = 2;
+  bigint two = 2;
+  for(int i = 0; i < k; i++){
+    res = res + powerMod(2, i, (bigint(1) << k)) * bits.at(i);
+    base = base * two;
+  }
+  return res;
+}
 template<class T>
 void make_sk_share(const typename T::mac_type& key, int N, int ntrip,
     string prep_data_prefix)
@@ -547,15 +562,13 @@ void make_sk_share(const typename T::mac_type& key, int N, int ntrip,
   for (int i=0; i<ntrip; i++)
     {
       if(i == 0) {
-        files.output_shares(100000);
+        files.output_shares(100000); // secret key, will be read as sk, _
         files.output_shares(0);
       } else {
-        files.output_shares(100000); //whatever
-        auto tmp = SeededPRNG().get<CurveElement::Scalar>();
-
-        files.output_shares(rand() % 10000);
+        files.output_shares(100000); // secret key will be read as _, val
+        files.output_shares(sk_share_helper(40)); // used to be value for PRandINT
       }
-     
+
     }
   check_files(files.outf, N);
 }
