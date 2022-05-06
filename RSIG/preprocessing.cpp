@@ -4,7 +4,6 @@
 #include "RSIG/transaction.h"
 
 
-
 #include "Processor/Data_Files.h"
 #include "Protocols/ReplicatedPrep.h"
 #include "Protocols/MaliciousShamirShare.h"
@@ -31,6 +30,45 @@ public:
   vector<T<CurveElement::Scalar>> w_values;
 };
 
+void EqualityTesting(){
+
+}
+
+/*
+void PRANDM(vector<vector<vector<scalarShare>>> &bitShares,
+              vector<vector<scalarShare>> &rShares,
+              int &buffer_size, int &number_of_parties){
+
+  for(int i = 0; i < buffer_size; i++) {
+    vector<vector<scalarShare>> tmp;
+    for(int j = 0; j < number_of_parties; j++) {
+      vector<scalarShare> tmp1;
+      for(int k = 0; k < 40 ; k++) {
+        scalarShare bitShare;
+        prep.get_one(DATA_BIT, bitShare);
+        tmp1.push_back(bitShare);
+      }
+      tmp.push_back(tmp1);
+    }
+    bitShares.push_back(tmp);
+  }
+  for(int i = 0; i < buffer_size; i++) {
+    for(int j = 0; j < number_of_parties; j++) {
+      scalarShare r_prime;
+      CurveElement::Scalar two = 1;
+      for(int k = 0; k < 40; k++) {
+          if( k != 0) {
+            CurveElement::Scalar tmp = 2;
+            two = two * tmp;
+          }
+          auto r = two * bitShares.at(i).at(j).at(k);
+          r_prime = r_prime + r;
+      }
+      rShares.at(i).push_back(r_prime);
+    }
+  }
+}
+*/
 template<template<class U> class T>
 void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s){
   bool prep_mul = opts.prep_mul;
@@ -54,7 +92,13 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
-
+//PRANDMULT
+//PRANDMULT
+//PRANDMULT
+//PRANDMULT
+//PRANDMULT
+//PRANDMULT
+  chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
       scalarShare _, r;
@@ -63,6 +107,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
   }
 
+  vector<vector<scalarShare>> rShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
     vector<vector<scalarShare>> tmp;
     for(int j = 0; j < number_of_parties; j++) {
@@ -76,10 +121,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
     bitShares.push_back(tmp);
   }
-
-
-  vector<vector<scalarShare>> rShares(buffer_size);
-
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare r_prime;
@@ -95,9 +136,20 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       rShares.at(i).push_back(r_prime);
     }
   }
-
+  chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  auto PRANDM = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  std::cout << "PRANDM Took: " << PRANDM << " miliseconds" << std::endl;
+  std::cout << "PRANDM Took: " << (float) PRANDM / (float) 1000 << " [s]" << std::endl;
+//  PRANDM(bitShares, rShares, buffer_size, number_of_parties);
+    //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING PROTOCOL 2
+  begin = std::chrono::steady_clock::now();
   vector<vector<scalarShare>> cShares(buffer_size);
-
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
       CurveElement::Scalar two = 1;
@@ -146,7 +198,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         val = val / 2;
         tmp1.push_back(s);
       }
-      //std::reverse(tmp1.begin(), tmp1.end());
       tmp.push_back(tmp1);
     }
     c_bits.push_back(tmp);
@@ -188,7 +239,20 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
   }
+  end = std::chrono::steady_clock::now();
+  auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  std::cout << "Equality Testing Took: " << equality_testing << " miliseconds" << std::endl;
+  std::cout << "Equality Testing Took: " << (float) equality_testing / (float) 1000 << " [s]" << std::endl;
 
+  //END OF EQUALITY TESTING PROTOCOL 2
+  //END OF EQUALITY TESTING PROTOCOL 2
+  //END OF EQUALITY TESTING PROTOCOL 2
+  //END OF EQUALITY TESTING PROTOCOL 2
+  //END OF EQUALITY TESTING PROTOCOL 2
+  //END OF EQUALITY TESTING PROTOCOL 2
+  //END OF EQUALITY TESTING PROTOCOL 2
+
+  begin = std::chrono::steady_clock::now();
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
   auto shareOfOne =  scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
@@ -199,12 +263,9 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       qs.at(j).push_back(q);
       ws.at(j).push_back(w);
     }
-
     tuples.at(j).q_values = qs.at(j);
     tuples.at(j).w_values = ws.at(j);
-
   }
-
 
   protocol.init_mul();
   for(int i = 0; i < buffer_size; i++){
@@ -258,7 +319,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       tuples.at(i).secret_R.push_back(roll);
     }
   }
-
+  end = std::chrono::steady_clock::now();
+  auto sign_preprocessing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  cout << "Generating qs, ws and computing L and Rs locally took: " << sign_preprocessing << " milliseconds" << endl;
+  cout << "Generating qs, ws and computing L and Rs locally took: " << (float) sign_preprocessing / (float) 1000<< " seconds" << endl;
   timer.stop();
     cout << "Generated " << buffer_size << " tuples in " << timer.elapsed()
             << " seconds, throughput " << buffer_size / timer.elapsed() << ", "

@@ -8,6 +8,7 @@
 
 #include "RSIG/preprocessing.cpp"
 #include "RSIG/sign.cpp"
+#include <chrono>
 
 #include "Protocols/Beaver.hpp"
 #include "Protocols/fake-stuff.hpp"
@@ -29,7 +30,7 @@ int main(int argc, const char** argv){
     ez::ezOptionParser opt;
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
-    int n_tuples = 100;
+    int n_tuples = 1000;
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
