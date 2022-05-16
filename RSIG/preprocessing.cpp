@@ -220,7 +220,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
 
   vector<vector<scalarShare>> z(buffer_size);
-
+  auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare sum;
@@ -241,9 +241,12 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
   end = std::chrono::steady_clock::now();
   auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  auto equality_online_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - onlineEQstart).count();
   std::cout << "Equality Testing Took: " << equality_testing << " miliseconds" << std::endl;
   std::cout << "Equality Testing Took: " << (float) equality_testing / (float) 1000 << " [s]" << std::endl;
-
+  std::cout << "Equality online Testing Took: " << equality_online_testing << " miliseconds" << std::endl;
+  std::cout << "Equality online Testing Took: " << (float) equality_online_testing / (float) 1000 << " [s]" << std::endl;
+  std::cout << "Equality testing without the multiplication of shares part: " << equality_testing - equality_online_testing << " milliseconds" << endl;
   //END OF EQUALITY TESTING PROTOCOL 2
   //END OF EQUALITY TESTING PROTOCOL 2
   //END OF EQUALITY TESTING PROTOCOL 2

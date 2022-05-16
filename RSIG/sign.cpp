@@ -32,10 +32,8 @@ RingSignature<T> sign(SignatureTransaction *tx,
         SubProcessor<T<CurveElement::Scalar>>& proc
         )
 {
-
-  typedef T<typename CurveElement::Scalar> scalarShare;
-  //typedef T<CurveElement> pointShare;
-
+    chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    typedef T<typename CurveElement::Scalar> scalarShare;
     Timer timer;
     timer.start();
     auto stats = P.total_comm();
@@ -111,12 +109,17 @@ RingSignature<T> sign(SignatureTransaction *tx,
   signature.challenges = challenges;
   signature.responses = responses;
   signature.keyImage = I;
+  chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  auto SignTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  cout << "Signing took: " << SignTime << " milliseconds" <<endl;
+  cout << "Signing took: " << (float) SignTime / (float) 1000 << " milliseconds" <<endl;
   return signature;
 }
 
 template<template<class U> class T>
 bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<CurveElement> publicKeys, Player& P, typename T<CurveElement::Scalar>::MAC_Check& MCp)
 {
+    chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     Timer timer;
     timer.start();
     //signature.s.check();
@@ -166,6 +169,10 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
 
   std::cout << "Offline checking took: " << timer.elapsed() * 1e3 << " ms. "
             << std::endl;
+  chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  auto VerfTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  cout << "Verification took: " << VerfTime << " milliseconds" << endl;
+  cout << "Verification took: " << (float) VerfTime / (float) 1000 << " milliseconds" << endl;
   return true;
 }
 

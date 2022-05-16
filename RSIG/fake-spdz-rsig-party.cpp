@@ -30,7 +30,7 @@ int main(int argc, const char** argv){
     ez::ezOptionParser opt;
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
-    int n_tuples = 1000;
+    int n_tuples = 2000;
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -59,6 +59,7 @@ int main(int argc, const char** argv){
     auto test_keys = gen(100000);
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
+    cout << "Running protocol " << n_tuples << " times" << endl;
     preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys), s);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc);
 }
