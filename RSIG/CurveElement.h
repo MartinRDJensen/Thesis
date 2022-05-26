@@ -27,6 +27,7 @@ public:
     typedef void Square;
     static const true_type invertible;
     static int size() { return sizeof(a); }
+    static int length() { return 256; }
     static string type_string() { return "Curve25519"; }
 
     static void init();

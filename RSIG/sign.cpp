@@ -29,7 +29,8 @@ RingSignature<T> sign(SignatureTransaction *tx,
         //RSIGOptions opts,
         T<CurveElement::Scalar> sk,
         CurveElement I,
-        SubProcessor<T<CurveElement::Scalar>>& proc
+        SubProcessor<T<CurveElement::Scalar>>& proc,
+        bench_coll *timer_struct
         )
 {
     chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -113,11 +114,12 @@ RingSignature<T> sign(SignatureTransaction *tx,
   auto SignTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   cout << "Signing took: " << SignTime << " milliseconds" <<endl;
   cout << "Signing took: " << (float) SignTime / (float) 1000 << " milliseconds" <<endl;
+  timer_struct->buffer_size_sign += SignTime;
   return signature;
 }
 
 template<template<class U> class T>
-bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<CurveElement> publicKeys, Player& P, typename T<CurveElement::Scalar>::MAC_Check& MCp)
+bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<CurveElement> publicKeys, Player& P, typename T<CurveElement::Scalar>::MAC_Check& MCp, bench_coll *timer_struct)
 {
     chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     Timer timer;
@@ -173,6 +175,7 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
   auto VerfTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   cout << "Verification took: " << VerfTime << " milliseconds" << endl;
   cout << "Verification took: " << (float) VerfTime / (float) 1000 << " milliseconds" << endl;
+  timer_struct->buffer_size_verf += VerfTime;
   return true;
 }
 
@@ -184,7 +187,8 @@ void sign_benchmark(SignatureTransaction* message,
         CurveElement I,
         std::vector<CurveElement> publicKeys,
         typename T<CurveElement::Scalar>::MAC_Check& MCp, Player& P,
-        SubProcessor<T<CurveElement::Scalar>>& proc
+        SubProcessor<T<CurveElement::Scalar>>& proc,
+        bench_coll *timer_struct
         )
 {
 
@@ -198,7 +202,7 @@ void sign_benchmark(SignatureTransaction* message,
     auto stats = P.total_comm();
     for (size_t i = 0; i < max(10lu, tuples.size()); i++)
     {
-        check(sign(message, tuples[i], MCp, MCc, P, sk, I, proc), message, publicKeys, P, MCp);
+        check(sign(message, tuples[i], MCp, MCc, P, sk, I, proc, timer_struct), message, publicKeys, P, MCp, timer_struct);
         Timer timer;
         timer.start();
         auto& check_player = MCp.get_check_player(P);

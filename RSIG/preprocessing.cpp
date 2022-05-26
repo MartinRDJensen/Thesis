@@ -1,8 +1,7 @@
 #include "RSIG/CurveElement.h"
 #include "RSIG/RSIGOptions.h"
-#include "RSIG/util.h"
 #include "RSIG/transaction.h"
-
+#include <thread>
 
 #include "Processor/Data_Files.h"
 #include "Protocols/ReplicatedPrep.h"
@@ -30,48 +29,33 @@ public:
   vector<T<CurveElement::Scalar>> w_values;
 };
 
-void EqualityTesting(){
-
-}
-
-/*
-void PRANDM(vector<vector<vector<scalarShare>>> &bitShares,
-              vector<vector<scalarShare>> &rShares,
-              int &buffer_size, int &number_of_parties){
-
-  for(int i = 0; i < buffer_size; i++) {
-    vector<vector<scalarShare>> tmp;
-    for(int j = 0; j < number_of_parties; j++) {
-      vector<scalarShare> tmp1;
-      for(int k = 0; k < 40 ; k++) {
-        scalarShare bitShare;
-        prep.get_one(DATA_BIT, bitShare);
-        tmp1.push_back(bitShare);
-      }
-      tmp.push_back(tmp1);
-    }
-    bitShares.push_back(tmp);
-  }
-  for(int i = 0; i < buffer_size; i++) {
-    for(int j = 0; j < number_of_parties; j++) {
-      scalarShare r_prime;
-      CurveElement::Scalar two = 1;
-      for(int k = 0; k < 40; k++) {
-          if( k != 0) {
-            CurveElement::Scalar tmp = 2;
-            two = two * tmp;
-          }
-          auto r = two * bitShares.at(i).at(j).at(k);
-          r_prime = r_prime + r;
-      }
-      rShares.at(i).push_back(r_prime);
-    }
-  }
-}
-*/
+static int num_threads = 3;
+static int EQ_K = 40;
 template<template<class U> class T>
-void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s){
+void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
+                   vector<T<CurveElement::Scalar>> *thread_vals, int ID,
+                   int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
+  auto& protocol = proc.protocol;
+  auto r = d_bits->at(low);
+  for(int k = low+1; k < high; k++) {
+    auto curr = d_bits->at(k);
+    protocol.init_mul();
+    protocol.prepare_mul(curr, r);
+    protocol.start_exchange();
+    protocol.stop_exchange();
+    protocol.check();
+    auto d = curr + r - protocol.finalize_mul();
+    r = d;
+  }
+  thread_vals->at(ID) = r;
+}
+
+
+
+template<template<class U> class T>
+void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct){
   bool prep_mul = opts.prep_mul;
+  cout << prep_mul << endl;
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -138,10 +122,11 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto PRANDM = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+  timer_struct->PRANDM = PRANDM;
   std::cout << "PRANDM Took: " << PRANDM << " miliseconds" << std::endl;
   std::cout << "PRANDM Took: " << (float) PRANDM / (float) 1000 << " [s]" << std::endl;
-//  PRANDM(bitShares, rShares, buffer_size, number_of_parties);
-    //EQUALITY TESTING PROTOCOL 2
+  //PRANDM(bitShares, rShares, buffer_size, number_of_parties);
+  //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
@@ -167,12 +152,11 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
           }
       }
       auto shareOfPos = scalarShare::constant(j, proc.P.my_num(), MCp.get_alphai());
-      auto shareOfTwo_ = scalarShare::constant(two_, proc.P.my_num(), MCp.get_alphai());
+      //auto shareOfTwo_ = scalarShare::constant(two_, proc.P.my_num(), MCp.get_alphai());
       auto c = (s - shareOfPos) + two * rrShares.at(i).at(j) + rShares.at(i).at(j);
       cShares.at(i).push_back(c);
     }
   }
-
   vector<vector<CurveElement::Scalar>> c_opened(buffer_size);
 
   for(int i = 0; i < buffer_size; i++) {
@@ -219,12 +203,31 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
   }
 
+  vector<scalarShare> thread_vals(num_threads+1);
   vector<vector<scalarShare>> z(buffer_size);
+  vector<thread> threads(num_threads);
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
+    // cout << "Fifth loop for iteration: " << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
-      scalarShare sum;
-      auto r = d_bits.at(i).at(j).at(0);
+      //auto r = d_bits.at(i).at(j).at(0);
+      for(int ID = 1; ID <= num_threads; ID++){
+        int low = (EQ_K / num_threads)*(ID-1);
+        int high = (EQ_K / num_threads) * ID;
+        if (ID == num_threads){
+          high += 1;
+        }
+        // thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
+        //thread abe (thread_worker, &d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
+       threads.push_back(std::thread(thread_worker, &d_bits.at(i).at(j), &thread_vals, ID, i, j, low, high, proc));
+      }
+      // for (auto &th : threads) {
+      //   th.join();
+      // }
+
+/*void thread_worker(vector<vector<vector<T<CurveElement::Scalar>>>> *d_bits,
+                   vector<T<CurveElement::Scalar>> *thread_vals, int ID,
+                   int i, int j, int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
@@ -234,11 +237,31 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
       }
-
+ */
+      auto r = thread_vals.at(1);
+      for(int k = 2; k < num_threads+1; k ++){
+        protocol.init_mul();
+        protocol.prepare_mul(thread_vals.at(k),r);
+        protocol.start_exchange();
+        protocol.stop_exchange();
+        protocol.check();
+        auto d = thread_vals.at(k) + r - protocol.finalize_mul();
+        r = d;
+      }
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
   }
+  /*
+  for (int i = 0; i < s.size(); i++) {
+    threads.push_back(std::thread(print, i, s[i]));
+  }
+
+  for (auto &th : threads) {
+    th.join();
+  }*/
+
+
   end = std::chrono::steady_clock::now();
   auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   auto equality_online_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - onlineEQstart).count();
@@ -247,6 +270,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   std::cout << "Equality online Testing Took: " << equality_online_testing << " miliseconds" << std::endl;
   std::cout << "Equality online Testing Took: " << (float) equality_online_testing / (float) 1000 << " [s]" << std::endl;
   std::cout << "Equality testing without the multiplication of shares part: " << equality_testing - equality_online_testing << " milliseconds" << endl;
+  timer_struct->EQ_TEST_ALL = equality_testing;
+  timer_struct->EQ_TEST_TRIPLE_CONSUME = equality_online_testing;
   //END OF EQUALITY TESTING PROTOCOL 2
   //END OF EQUALITY TESTING PROTOCOL 2
   //END OF EQUALITY TESTING PROTOCOL 2
@@ -326,6 +351,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   auto sign_preprocessing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   cout << "Generating qs, ws and computing L and Rs locally took: " << sign_preprocessing << " milliseconds" << endl;
   cout << "Generating qs, ws and computing L and Rs locally took: " << (float) sign_preprocessing / (float) 1000<< " seconds" << endl;
+  timer_struct->q_w_L_R = sign_preprocessing;
   timer.stop();
     cout << "Generated " << buffer_size << " tuples in " << timer.elapsed()
             << " seconds, throughput " << buffer_size / timer.elapsed() << ", "
@@ -333,6 +359,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
             << " kbytes per tuple" << endl;
     (P.total_comm() - stats).print(true);
 }
+<<<<<<< HEAD
 
 
 template<template<class U> class T>
@@ -605,3 +632,5 @@ void preprocessing2(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor
 }
 
 
+=======
+>>>>>>> 5ab96a23519b1de723af4620a6dd9c4bd4dddcc3
