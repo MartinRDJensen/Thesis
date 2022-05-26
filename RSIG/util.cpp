@@ -1,6 +1,6 @@
 #include "util.h"
-CurveElement G(1);
 
+CurveElement G(1);
 
 CurveElement::Scalar crypto_hash(unsigned char *m,
                                        std::vector<CurveElement> L,
@@ -61,7 +61,5 @@ std::vector<CurveElement> genPublicKeys(int n, CurveElement pk) {
   }
   return publicKeys;
 }
-
-
 
 
