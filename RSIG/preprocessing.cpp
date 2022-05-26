@@ -29,12 +29,13 @@ public:
   vector<T<CurveElement::Scalar>> w_values;
 };
 
-static int num_threads = 3;
+static int num_threads = 2;
 static int EQ_K = 40;
 template<template<class U> class T>
 void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
                    int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
+  cout << "actually starting thread: " << ID << endl;
   auto& protocol = proc.protocol;
   auto r = d_bits->at(low);
   for(int k = low+1; k < high; k++) {
@@ -202,7 +203,13 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       }
     }
   }
-
+  cout << "testasdfaslkdfjasklædfjas"<< endl;
+  cout << "testasdfaslkdfjasklædfjas"<< endl;
+  cout << "testasdfaslkdfjasklædfjas"<< endl;
+  cout << "testasdfaslkdfjasklædfjas"<< endl;
+  cout << "testasdfaslkdfjasklædfjas"<< endl;
+  cout << "testasdfaslkdfjasklædfjas"<< endl;
+  cout << "testasdfaslkdfjasklædfjas"<< endl;
   vector<scalarShare> thread_vals(num_threads+1);
   vector<vector<scalarShare>> z(buffer_size);
   vector<thread> threads(num_threads);
@@ -217,14 +224,52 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         if (ID == num_threads){
           high += 1;
         }
+        cout << "ID is: " << ID << endl;
+        cout << "ID is: " << ID << endl;
+        cout << "ID is: " << ID << endl;
+        cout << "ID is: " << ID << endl;
+        thread testa([&] () {
+          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
+                     });
+        testa.join();
+        //threads.emplace_back([&] () {
+        //  thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
+        //});
+/*
+          std::thread my_thread([](
+    do_something();
+    do_something_else();
+});*/
+        auto tmps = &threads.at(ID-1);
+        if(tmps) {
+          cout << "erreroerasdfasd " << tmps << endl;
+        }
+
         // thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
         //thread abe (thread_worker, &d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
-       threads.push_back(std::thread(thread_worker, &d_bits.at(i).at(j), &thread_vals, ID, i, j, low, high, proc));
+       // threads.push_back(std::thread(thread_worker<scalarShare>, &d_bits.at(i).at(j), &thread_vals, ID, i, j, low, high, proc));
       }
-      // for (auto &th : threads) {
-      //   th.join();
-      // }
-
+      cout << "abegang" << endl;
+      cout << "abegang" << endl;
+      cout << "abegang" << endl;
+      cout << "abegang" << endl;
+      cout << "abegang" << endl;
+      cout << "abegang" << endl;
+      for(auto &th : threads)
+      {
+        thread::id this_id = th.get_id();
+        cout << "thread id:" << this_id << endl;
+        th.join();
+        cout << "after a joing" << endl;
+      }
+      cout << "wollooo looooo" << endl;
+      cout << "wollooo looooo" << endl;
+      cout << "wollooo looooo" << endl;
+      cout << "wollooo looooo" << endl;
+      cout << "wollooo looooo" << endl;
+      cout << "wollooo looooo" << endl;
+      cout << "wollooo looooo" << endl;
+      cout << "wollooo looooo" << endl;
 /*void thread_worker(vector<vector<vector<T<CurveElement::Scalar>>>> *d_bits,
                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
                    int i, int j, int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
