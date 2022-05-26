@@ -359,7 +359,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
             << " kbytes per tuple" << endl;
     (P.total_comm() - stats).print(true);
 }
-<<<<<<< HEAD
 
 
 template<template<class U> class T>
@@ -477,7 +476,6 @@ void preprocessing2(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor
     MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
     MCp.Check(extra_player);
   }
-    cout << ""
   vector<vector<vector<CurveElement::Scalar>>> c_bits;
 
   for(int i = 0; i < buffer_size; i++) {
@@ -632,5 +630,3 @@ void preprocessing2(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor
 }
 
 
-=======
->>>>>>> 5ab96a23519b1de723af4620a6dd9c4bd4dddcc3
