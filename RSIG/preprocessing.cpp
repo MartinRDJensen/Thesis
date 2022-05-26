@@ -269,7 +269,16 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         cout << "thread id:" << this_id << endl;
         cout << "thread id:" << this_id << endl;
         if (th.joinable())
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
           th.join();
+        cout << "after a joing" << endl;
+        cout << "after a joing" << endl;
+        cout << "after a joing" << endl;
+        cout << "after a joing" << endl;
         cout << "after a joing" << endl;
       }
       cout << "wollooo looooo" << endl;
