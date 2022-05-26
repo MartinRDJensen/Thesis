@@ -35,10 +35,14 @@ template<template<class U> class T>
 void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
                    int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
+  cout << "actually starting thread: " << ID << endl;
   auto& protocol = proc.protocol;
   auto r = d_bits->at(low);
   for(int k = low+1; k < high; k++) {
+    cout << "accessing k: " << k << endl;
+    cout << "k < " << high << endl;
     auto curr = d_bits->at(k);
+    cout << "got: " << curr << endl;
     protocol.init_mul();
     protocol.prepare_mul(curr, r);
     protocol.start_exchange();
@@ -47,7 +51,9 @@ void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
     auto d = curr + r - protocol.finalize_mul();
     r = d;
   }
+  cout << "trying to add elem..." << endl;
   thread_vals->at(ID) = r;
+  cout << "added elem..." << endl;
 }
 
 
@@ -209,9 +215,9 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   cout << "testasdfaslkdfjasklædfjas"<< endl;
   cout << "testasdfaslkdfjasklædfjas"<< endl;
   cout << "testasdfaslkdfjasklædfjas"<< endl;
-  vector<scalarShare> thread_vals(num_threads+1);
+  vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  vector<thread> threads(num_threads);
+  vector<thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     // cout << "Fifth loop for iteration: " << i << endl;
@@ -220,7 +226,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       for(int ID = 1; ID <= num_threads; ID++){
         int low = (EQ_K / num_threads)*(ID-1);
         int high = (EQ_K / num_threads) * ID;
-        if (ID == num_threads){
+        cout << "low: " << low << " high: " << high << endl;
+        if (ID == num_threads && EQ_K % num_threads != 0){
           high += 1;
         }
         cout << "ID is: " << ID << endl;
@@ -230,7 +237,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         thread testa([&] () {
           thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
                      });
-        testa.join();
+        //testa.join();
+        threads.push_back(std::move(testa));
         //threads.emplace_back([&] () {
         //  thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
         //});
@@ -258,7 +266,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       {
         thread::id this_id = th.get_id();
         cout << "thread id:" << this_id << endl;
-        th.join();
+        cout << "thread id:" << this_id << endl;
+        cout << "thread id:" << this_id << endl;
+        if (th.joinable())
+          th.join();
         cout << "after a joing" << endl;
       }
       cout << "wollooo looooo" << endl;
