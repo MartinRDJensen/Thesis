@@ -34,21 +34,37 @@ static int EQ_K = 40;
 template<template<class U> class T>
 void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
-                   int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
+                   int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
   cout << "actually starting thread: " << ID << endl;
-  auto& protocol = proc.protocol;
   auto r = d_bits->at(low);
   for(int k = low+1; k < high; k++) {
+    cout << "accessing k: " << k << endl;
+    cout << "k < " << high << endl;
     auto curr = d_bits->at(k);
-    protocol.init_mul();
-    protocol.prepare_mul(curr, r);
-    protocol.start_exchange();
-    protocol.stop_exchange();
-    protocol.check();
-    auto d = curr + r - protocol.finalize_mul();
+    cout << "got: " << curr << endl;
+    protocol->init_mul();
+    cout << "After init mul" << endl;
+    protocol->prepare_mul(curr, r);
+    cout << "After prepare mul" << endl;
+    protocol->start_exchange();
+    cout << "After start exchange" << endl;
+    protocol->stop_exchange();
+    cout << "adter stop exchange" << endl;
+    protocol->check();
+    cout << "After protocol check" << endl;
+    auto d = curr + r - protocol->finalize_mul();
+    //
+    // protocol.init_mul();
+    // protocol.prepare_mul(curr, r);
+    // protocol.start_exchange();
+    // protocol.stop_exchange();
+    // protocol.check();
+    // auto d = curr + r - protocol.finalize_mul();
     r = d;
   }
+  cout << "trying to add elem..." << endl;
   thread_vals->at(ID) = r;
+  cout << "added elem..." << endl;
 }
 
 
@@ -70,6 +86,29 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   typedef T<typename CurveElement::Scalar> scalarShare;
   typedef T<CurveElement> pointShare;
   typename pointShare::Direct_MC MCc(MCp.get_alphai());
+
+  scalarShare new1;
+  cout << "testoasdfasdf: " << new1 << endl;
+  new1.assign_zero();
+  cout << new1 << endl;
+
+    // auto tmpa = SeededPRNG().get<CurveElement::Scalar>();
+    // cout << tmpa << endl;
+    // auto squared = tmpa*tmpa;
+    // cout << tmpa << endl;
+    // auto old = squared.sqrRoot();
+    // int bit;
+    // if (old == tmpa){
+    //   bit = 1;
+    // } else {
+    //   bit = 0;
+    // }
+    //
+    //
+
+
+
+
   CurveElement G(1);
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
@@ -210,9 +249,9 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   cout << "testasdfaslkdfjasklædfjas"<< endl;
   cout << "testasdfaslkdfjasklædfjas"<< endl;
   cout << "testasdfaslkdfjasklædfjas"<< endl;
-  vector<scalarShare> thread_vals(num_threads+1);
+  vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  vector<thread> threads(num_threads);
+  vector<thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     // cout << "Fifth loop for iteration: " << i << endl;
@@ -221,7 +260,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       for(int ID = 1; ID <= num_threads; ID++){
         int low = (EQ_K / num_threads)*(ID-1);
         int high = (EQ_K / num_threads) * ID;
-        if (ID == num_threads){
+        cout << "low: " << low << " high: " << high << endl;
+        if (ID == num_threads && EQ_K % num_threads != 0){
           high += 1;
         }
         cout << "ID is: " << ID << endl;
@@ -229,9 +269,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         cout << "ID is: " << ID << endl;
         cout << "ID is: " << ID << endl;
         thread testa([&] () {
-          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
+          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
                      });
-        testa.join();
+        //testa.join();
+        threads.push_back(std::move(testa));
         //threads.emplace_back([&] () {
         //  thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
         //});
@@ -259,7 +300,19 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       {
         thread::id this_id = th.get_id();
         cout << "thread id:" << this_id << endl;
-        th.join();
+        cout << "thread id:" << this_id << endl;
+        cout << "thread id:" << this_id << endl;
+        if (th.joinable())
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
+          cout << "JOINGING" << endl;
+          th.join();
+        cout << "after a joing" << endl;
+        cout << "after a joing" << endl;
+        cout << "after a joing" << endl;
+        cout << "after a joing" << endl;
         cout << "after a joing" << endl;
       }
       cout << "wollooo looooo" << endl;

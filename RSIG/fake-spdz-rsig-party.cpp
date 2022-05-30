@@ -54,6 +54,10 @@ int main(int argc, const char** argv){
     pShare sk, s;
     proc.DataF.get_two(DATA_INVERSE, sk, s);
 
+    // auto testbit = prep.get_bit();
+    // cout << "testibit test:" << testbit << endl;
+    // int asdf = 0;
+    // cin >> asdf;
     bench_coll timer_struct;
     vector<RSIGTuple<Share>> tuples(buffer_size);
 
