@@ -250,7 +250,7 @@ mascot-ecdsa-party.x: $(OT) $(LIBSIMPLEOT)
 fake-spdz-ecdsa-party.x: $(OT) $(LIBSIMPLEOT)
 
 semi-rsig-party.x: $(OT) $(LIBSIMPLEOT) GC/SemiPrep.o GC/SemiSecret.o
-mascot-rsig-party.x: $(OT) $(LIBSIMPLEOT)
+mascot-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
 fake-spdz-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
 
 

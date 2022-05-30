@@ -36,6 +36,9 @@ void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
                    int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
   cout << "actually starting thread: " << ID << endl;
+//                   int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
+  cout << "actually starting thread: " << ID << endl;
+  //auto& protocol = proc.protocol;
   auto r = d_bits->at(low);
   for(int k = low+1; k < high; k++) {
     cout << "accessing k: " << k << endl;
@@ -270,6 +273,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         cout << "ID is: " << ID << endl;
         thread testa([&] () {
           thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
+//          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
                      });
         //testa.join();
         threads.push_back(std::move(testa));
