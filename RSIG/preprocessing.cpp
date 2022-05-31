@@ -29,45 +29,39 @@ public:
   vector<T<CurveElement::Scalar>> w_values;
 };
 
-static int num_threads = 2;
+static int num_threads = 1;
 static int EQ_K = 40;
 template<template<class U> class T>
 void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
                    int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
-  cout << "actually starting thread: " << ID << endl;
 //                   int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
-  cout << "actually starting thread: " << ID << endl;
-  //auto& protocol = proc.protocol;
+
+//  auto& protocol = proc.protocol;
   auto r = d_bits->at(low);
+  cout << "WE GOT ID AS: " << ID << endl;
   for(int k = low+1; k < high; k++) {
-    cout << "accessing k: " << k << endl;
-    cout << "k < " << high << endl;
+    //cout << k <<  " < " << high << endl;
     auto curr = d_bits->at(k);
-    cout << "got: " << curr << endl;
+    //cout << "got: " << curr << endl;
     protocol->init_mul();
-    cout << "After init mul" << endl;
     protocol->prepare_mul(curr, r);
-    cout << "After prepare mul" << endl;
     protocol->start_exchange();
-    cout << "After start exchange" << endl;
     protocol->stop_exchange();
-    cout << "adter stop exchange" << endl;
     protocol->check();
-    cout << "After protocol check" << endl;
     auto d = curr + r - protocol->finalize_mul();
-    //
-    // protocol.init_mul();
-    // protocol.prepare_mul(curr, r);
-    // protocol.start_exchange();
-    // protocol.stop_exchange();
-    // protocol.check();
-    // auto d = curr + r - protocol.finalize_mul();
     r = d;
+   /*
+    protocol.init_mul();
+    protocol.prepare_mul(curr, r);
+    protocol.start_exchange();
+    protocol.stop_exchange();
+    protocol.check();
+    auto d = curr + r - protocol.finalize_mul();
+    r = d;*/
   }
-  cout << "trying to add elem..." << endl;
+  cout << "THREAD_VALS->at("<<ID<<")"<<endl;
   thread_vals->at(ID) = r;
-  cout << "added elem..." << endl;
 }
 
 
@@ -90,10 +84,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   typedef T<CurveElement> pointShare;
   typename pointShare::Direct_MC MCc(MCp.get_alphai());
 
-  scalarShare new1;
-  cout << "testoasdfasdf: " << new1 << endl;
-  new1.assign_zero();
-  cout << new1 << endl;
 
     // auto tmpa = SeededPRNG().get<CurveElement::Scalar>();
     // cout << tmpa << endl;
@@ -245,21 +235,13 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       }
     }
   }
-  cout << "testasdfaslkdfjasklædfjas"<< endl;
-  cout << "testasdfaslkdfjasklædfjas"<< endl;
-  cout << "testasdfaslkdfjasklædfjas"<< endl;
-  cout << "testasdfaslkdfjasklædfjas"<< endl;
-  cout << "testasdfaslkdfjasklædfjas"<< endl;
-  cout << "testasdfaslkdfjasklædfjas"<< endl;
-  cout << "testasdfaslkdfjasklædfjas"<< endl;
   vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
   vector<thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
-    // cout << "Fifth loop for iteration: " << i << endl;
+    cout << "Fifth loop for iteration: " << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
-      //auto r = d_bits.at(i).at(j).at(0);
       for(int ID = 1; ID <= num_threads; ID++){
         int low = (EQ_K / num_threads)*(ID-1);
         int high = (EQ_K / num_threads) * ID;
@@ -267,70 +249,22 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         if (ID == num_threads && EQ_K % num_threads != 0){
           high += 1;
         }
-        cout << "ID is: " << ID << endl;
-        cout << "ID is: " << ID << endl;
-        cout << "ID is: " << ID << endl;
-        cout << "ID is: " << ID << endl;
+	cout << "ID IS: " << ID << endl;
+	cout << "ID IS: " << ID << endl;
         thread testa([&] () {
           thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
-//          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
                      });
-        //testa.join();
+	cout << "ID IS: " << ID << endl;
+	cout << "ID IS: " << ID << endl;
         threads.push_back(std::move(testa));
-        //threads.emplace_back([&] () {
-        //  thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
-        //});
-/*
-          std::thread my_thread([](
-    do_something();
-    do_something_else();
-});*/
-        auto tmps = &threads.at(ID-1);
-        if(tmps) {
-          cout << "erreroerasdfasd " << tmps << endl;
-        }
-
-        // thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
-        //thread abe (thread_worker, &d_bits.at(i).at(j), &thread_vals, ID, low, high, proc);
-       // threads.push_back(std::thread(thread_worker<scalarShare>, &d_bits.at(i).at(j), &thread_vals, ID, i, j, low, high, proc));
       }
-      cout << "abegang" << endl;
-      cout << "abegang" << endl;
-      cout << "abegang" << endl;
-      cout << "abegang" << endl;
-      cout << "abegang" << endl;
-      cout << "abegang" << endl;
-      for(auto &th : threads)
-      {
-        thread::id this_id = th.get_id();
-        cout << "thread id:" << this_id << endl;
-        cout << "thread id:" << this_id << endl;
-        cout << "thread id:" << this_id << endl;
-        if (th.joinable())
-          cout << "JOINGING" << endl;
-          cout << "JOINGING" << endl;
-          cout << "JOINGING" << endl;
-          cout << "JOINGING" << endl;
-          cout << "JOINGING" << endl;
+      for(auto &th : threads){
+        if (th.joinable()){
           th.join();
-        cout << "after a joing" << endl;
-        cout << "after a joing" << endl;
-        cout << "after a joing" << endl;
-        cout << "after a joing" << endl;
-        cout << "after a joing" << endl;
+	      }
       }
-      cout << "wollooo looooo" << endl;
-      cout << "wollooo looooo" << endl;
-      cout << "wollooo looooo" << endl;
-      cout << "wollooo looooo" << endl;
-      cout << "wollooo looooo" << endl;
-      cout << "wollooo looooo" << endl;
-      cout << "wollooo looooo" << endl;
-      cout << "wollooo looooo" << endl;
-/*void thread_worker(vector<vector<vector<T<CurveElement::Scalar>>>> *d_bits,
-                   vector<T<CurveElement::Scalar>> *thread_vals, int ID,
-                   int i, int j, int low, int high, SubProcessor<T<CurveElement::Scalar>>& proc){
-      for(int k = 1; k < 40; k++) {
+      //auto r = d_bits.at(i).at(j).at(0);
+      /*for(int k = 1; k < 40; k++) {
         protocol.init_mul();
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
         protocol.start_exchange();
@@ -338,9 +272,20 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         protocol.check();
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
-      }
- */
+      }*/
       auto r = thread_vals.at(1);
+      cout << "AT INDEX 1: " << r;
+      cout << "AT INDEX 1: " << r;
+      cout << "AT INDEX 1: " << r;
+      cout << "AT INDEX 1: " << r;
+      cout << "AT INDEX 1: " << r;
+      cout << "AT INDEX 1: " << r;
+      cout << "AT INDEX 1: " << r;
+      cout << "AT INDEX 0: " << thread_vals.at(0);
+      cout << "AT INDEX 0: " << thread_vals.at(0);
+      cout << "AT INDEX 0: " << thread_vals.at(0);
+      cout << "AT INDEX 0: " << thread_vals.at(0);
+      cout << "AT INDEX 0: " << thread_vals.at(0);
       for(int k = 2; k < num_threads+1; k ++){
         protocol.init_mul();
         protocol.prepare_mul(thread_vals.at(k),r);

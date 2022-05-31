@@ -31,7 +31,7 @@ int main(int argc, const char** argv){
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
     //int n_tuples = 1000;
-    int buffer_size = 1000;
+    int buffer_size = 10;
     if (not opt.lastArgs.empty())
         buffer_size = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");

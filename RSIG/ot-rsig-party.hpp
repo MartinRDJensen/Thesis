@@ -103,7 +103,7 @@ void run(int argc, const char** argv)
     typename pShare::TriplePrep sk_prep(0, usage);
     SubProcessor<pShare> sk_proc(_, MCp, sk_prep, P);
     pShare sk, __;
-    
+
     // synchronize
     Bundle<octetStream> bundle(P);
     P.unchecked_broadcast(bundle);
@@ -117,6 +117,7 @@ void run(int argc, const char** argv)
     OnlineOptions::singleton.batch_size = (1 + pShare::Protocol::uses_triples) * n_tuples;
     typename pShare::TriplePrep prep(0, usage);
     prep.params.correlation_check &= not opt.isSet("-U");
+    prep.params.generateBits = true;
     prep.params.fewer_rounds = opt.isSet("-A");
     prep.params.fiat_shamir = opt.isSet("-H");
     prep.params.check = not opt.isSet("-E");
@@ -137,6 +138,8 @@ void run(int argc, const char** argv)
     SubProcessor<pShare> proc2(_, MCp, prep2, P);
     pShare tmp, s;
     proc.DataF.get_two(DATA_INVERSE, tmp, s);
+
+    bench_coll timer_struct;
     vector<RSIGTuple<Share>> tuples(n_tuples);
     // BEGIN FOR HIDING THE RECEIVER
     //THEY DO HAVE THE SIGNER SECRET KEY IN test_keys WHICH IS NOT GOOD
@@ -148,6 +151,7 @@ void run(int argc, const char** argv)
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
     cout << "Running protocol " << n_tuples << " times" << endl;
-    preprocessing2(tuples, opts, proc, proc2 ,n_tuples, publicKeys, get<2>(test_keys), s);
+    preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys), s, &timer_struct);
+
     //sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc);
 }
