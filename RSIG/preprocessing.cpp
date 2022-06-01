@@ -2,6 +2,8 @@
 #include "RSIG/RSIGOptions.h"
 #include "RSIG/transaction.h"
 #include <thread>
+#include <algorithm>
+#include <random>
 
 #include "Processor/Data_Files.h"
 #include "Protocols/ReplicatedPrep.h"
@@ -43,7 +45,7 @@ void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
   for(int k = low+1; k < high; k++) {
     //cout << k <<  " < " << high << endl;
     auto curr = d_bits->at(k);
-    //cout << "got: " << curr << endl;
+    //out << "got: " << curr << endl;
     protocol->init_mul();
     protocol->prepare_mul(curr, r);
     protocol->start_exchange();
@@ -61,13 +63,12 @@ void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
     r = d;*/
   }
   cout << "THREAD_VALS->at("<<ID<<")"<<endl;
-  thread_vals->at(ID) = r;
+  // thread_vals->at(ID) = r;
+  thread_vals->at(1) = r;
 }
 
-
-
 template<template<class U> class T>
-void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct){
+void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> ss, bench_coll *timer_struct){
   bool prep_mul = opts.prep_mul;
   cout << prep_mul << endl;
   Timer timer;
@@ -77,14 +78,13 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   size_t start = P.total_comm().sent;
   auto stats = P.total_comm();
   auto& extra_player = P;
-
   auto& protocol = proc.protocol;
   auto& MCp = proc.MC;
   typedef T<typename CurveElement::Scalar> scalarShare;
   typedef T<CurveElement> pointShare;
   typename pointShare::Direct_MC MCc(MCp.get_alphai());
 
-
+  auto s = scalarShare::constant(0, proc.P.my_num(), MCp.get_alphai());
     // auto tmpa = SeededPRNG().get<CurveElement::Scalar>();
     // cout << tmpa << endl;
     // auto squared = tmpa*tmpa;
@@ -106,6 +106,18 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
+  prep.buffer_bits();
+  cout << "after buffer bits..." << endl;
+  int geas = 0;
+  vector<scalarShare> bitters(40);
+  for(int i = 0; i < 40; i ++){
+    cout << "i: " << i << endl;
+    scalarShare teso;
+    prep.get_one(DATA_BIT, teso);
+    bitters.at(i) = teso;
+  }
+
+
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
@@ -115,17 +127,29 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
 //PRANDMULT
 //PRANDMULT
 //PRANDMULT
+  auto rng = default_random_engine {};
   chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
-      scalarShare _, r;
-      prep.get_two(DATA_INVERSE, _, r);
-      rrShares.at(i).push_back(r);
+      scalarShare r_prime_prime;
+      shuffle(std::begin(bitters), std::end(bitters), rng);
+      for(int inner = 0; inner < 40; inner ++){
+        scalarShare curr = bitters.at(inner);
+        auto c = powerMod(2, inner, (bigint(1) << 40));
+        r_prime_prime += curr * c;
+      }
+      rrShares.at(i).push_back(r_prime_prime);
+      }
     }
-  }
-
+        // for(int j = 0; j < number_of_parties; j++){
+    //   scalarShare _, r;
+    //   prep.get_two(DATA_INVERSE, _, r);
+    // rrShares.at(i).push_back(r);
+    // }
+  cout << "got here?" << endl;
   vector<vector<scalarShare>> rShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
+    cout << "i: " << i << endl;
     vector<vector<scalarShare>> tmp;
     for(int j = 0; j < number_of_parties; j++) {
       vector<scalarShare> tmp1;
@@ -138,7 +162,9 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
     bitShares.push_back(tmp);
   }
+  cout << "got here2?" << endl;
   for(int i = 0; i < buffer_size; i++) {
+    cout << "i: " << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare r_prime;
       CurveElement::Scalar two = 1;
@@ -147,9 +173,11 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
             CurveElement::Scalar tmp = 2;
             two = two * tmp;
           }
+          cout << "k: " << k << endl;
           auto r = two * bitShares.at(i).at(j).at(k);
           r_prime = r_prime + r;
       }
+      cout << "inserting elem" << endl;
       rShares.at(i).push_back(r_prime);
     }
   }
@@ -177,16 +205,18 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
             two = two * tmp;
           }
       }
-      CurveElement::Scalar two_;
-      for(int k = 0; k < 40; k++) {
-         if( k != 0) {
-            CurveElement::Scalar tmp = 2;
-            two_ = two_ * tmp;
-          }
-      }
       auto shareOfPos = scalarShare::constant(j, proc.P.my_num(), MCp.get_alphai());
       //auto shareOfTwo_ = scalarShare::constant(two_, proc.P.my_num(), MCp.get_alphai());
-      auto c = (s - shareOfPos) + two * rrShares.at(i).at(j) + rShares.at(i).at(j);
+      //auto c = (s - shareOfPos) + two * rrShares.at(i).at(j) + rShares.at(i).at(j);
+      cout << bitters.at(0) << endl;
+      cout << bitters.at(0) << endl;
+      cout << bitters.at(0) << endl;
+      cout << bitters.at(0) << endl;
+      cout << bitters.at(0) << endl;
+      cout << bitters.at(0) << endl;
+      cout << bitters.at(0) << endl;
+      cout << bitters.at(0) << endl;
+      auto c = (bitters.at(0) - shareOfPos) + two * rrShares.at(i).at(j) + rShares.at(i).at(j);
       cShares.at(i).push_back(c);
     }
   }
@@ -197,7 +227,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
     MCp.Check(extra_player);
   }
-
   vector<vector<vector<CurveElement::Scalar>>> c_bits;
 
   for(int i = 0; i < buffer_size; i++) {
@@ -240,7 +269,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   vector<thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
-    cout << "Fifth loop for iteration: " << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
       for(int ID = 1; ID <= num_threads; ID++){
         int low = (EQ_K / num_threads)*(ID-1);
@@ -350,6 +378,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
   protocol.start_exchange();
   protocol.stop_exchange();
+  cout << "right before ded" << endl;
+  cout << "right before ded" << endl;
+  cout << "right before ded" << endl;
+  cout << "right before ded" << endl;
   protocol.check();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j ++){

@@ -49,6 +49,7 @@ int main(int argc, const char** argv){
     ArithmeticProcessor _({}, 0);
     BaseMachine machine;
     machine.ot_setups.push_back({P, false});
+    // machine.thread_num = P.my_num();
     SubProcessor<pShare> proc(_, MCp, prep, P);
     vector<CurveElement::Scalar> tmp(1);
     pShare sk, s;

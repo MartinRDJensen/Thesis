@@ -80,7 +80,7 @@ void run(int argc, const char** argv)
     );
 
     Names N(opt, argc, argv, 2);
-    int n_tuples = 1000;
+    int n_tuples = 10;
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -147,11 +147,21 @@ void run(int argc, const char** argv)
     //auto test_keys = gen(sk.get_share());
 
     auto test_keys = gen(5);
-
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
     cout << "Running protocol " << n_tuples << " times" << endl;
     preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys), s, &timer_struct);
-
-    //sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc);
+    cout << "starign sign bench" << endl;
+    cout << "starign sign bench" << endl;
+    cout << "starign sign bench" << endl;
+    cout << "starign sign bench" << endl;
+    cout << "starign sign bench" << endl;
+    sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
+    cout << "after sign bench" << endl;
+    cout << "after sign bench" << endl;
+    cout << "after sign bench" << endl;
+    cout << "after sign bench" << endl;
+    cout << "after sign bench" << endl;
+    cout << "after sign bench" << endl;
+    cout << "after sign bench" << endl;
 }
