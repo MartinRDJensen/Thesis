@@ -35,8 +35,8 @@ CurveElement::Scalar hash_to_scalar(const unsigned char* h) {
 }
 
 
-std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen(int skVal) {
-    CurveElement::Scalar sk = skVal;
+std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen(CurveElement::Scalar sk) {
+    //CurveElement::Scalar sk = skVal;
 
     CurveElement::init();
    // PRNG random(seed);

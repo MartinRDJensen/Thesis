@@ -64,10 +64,11 @@ int main(int argc, const char** argv){
 
     // BEGIN FOR HIDING THE RECEIVER
     //THEY DO HAVE THE SIGNER SECRET KEY IN test_keys WHICH IS NOT GOOD
-    auto test_keys = gen(100000);
+    CurveElement::Scalar skk = 100000;
+    auto test_keys = gen(skk);
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
-    preprocessing(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct);
+    fake(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
     cout << "done" << endl;
     cout << "PRANDM took: " << timer_struct.PRANDM << " miliseconds." << endl;

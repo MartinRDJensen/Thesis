@@ -80,7 +80,7 @@ void run(int argc, const char** argv)
     );
 
     Names N(opt, argc, argv, 2);
-    int n_tuples = 10;
+    int n_tuples = 1;
     if (not opt.lastArgs.empty())
         n_tuples = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -114,7 +114,7 @@ void run(int argc, const char** argv)
     cout << "Secret key generation took " << timer.elapsed() * 1e3 << " ms" << endl;
     (P.total_comm() - stats).print(true);
 
-    OnlineOptions::singleton.batch_size = (1 + pShare::Protocol::uses_triples) * n_tuples;
+    OnlineOptions::singleton.batch_size = (1 + pShare::Protocol::uses_triples) * (n_tuples + 100);
     typename pShare::TriplePrep prep(0, usage);
     prep.params.correlation_check &= not opt.isSet("-U");
     prep.params.generateBits = true;
@@ -131,26 +131,25 @@ void run(int argc, const char** argv)
     bool prep_mul = not opt.isSet("-D");
     prep.params.use_extension = not opt.isSet("-S");
 
-    // READ BITS AND SENDERS INDEX
-    string prefix = get_prep_sub_dir<pShare>(PREP_DIR "RSIG/", 2);
-    read_mac_key(prefix, N, keyp);
-    Sub_Data_Files<pShare> prep2(N, prefix, usage);
-    SubProcessor<pShare> proc2(_, MCp, prep2, P);
-    pShare tmp, s;
-    proc.DataF.get_two(DATA_INVERSE, tmp, s);
-
     bench_coll timer_struct;
     vector<RSIGTuple<Share>> tuples(n_tuples);
     // BEGIN FOR HIDING THE RECEIVER
     //THEY DO HAVE THE SIGNER SECRET KEY IN test_keys WHICH IS NOT GOOD
-    cout << "KEY " << sk.get_share() << endl;
+    vector<pShare> skk;
+    skk.push_back(sk);
+    vector<CurveElement::Scalar> sk_open;
+
+    MCp.POpen_Begin(sk_open, skk , P);
+    MCp.POpen_End(sk_open, skk , P);
+    MCp.Check(P);
+    cout << "sk is " << sk_open.at(0) << endl;
     //auto test_keys = gen(sk.get_share());
 
-    auto test_keys = gen(5);
+    auto test_keys = gen(sk_open.at(0));
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
     cout << "Running protocol " << n_tuples << " times" << endl;
-    preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys), s, &timer_struct);
+    preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys), sk, &timer_struct);
     cout << "starign sign bench" << endl;
     cout << "starign sign bench" << endl;
     cout << "starign sign bench" << endl;
