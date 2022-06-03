@@ -47,6 +47,12 @@ void print_timers(bench_coll* timer_struct, int buffer_size){
   cout << "Average sign took: " << ((float) timer_struct->buffer_size_sign / (float) buffer_size) / (float) 1000 << " seconds." << endl;
   cout << "Average verf took: " << (float) timer_struct->buffer_size_verf / (float) buffer_size << " miliseconds." << endl;
   cout << "Average verf took: " << ((float) timer_struct->buffer_size_verf / (float) buffer_size) / (float) 1000 << " seconds." << endl;
+  cout << "Doing online checking " << buffer_size << " times took " << timer_struct->total_online << " miliseconds" << endl;
+  cout << "Average online checking took " << (float) timer_struct->total_online / (float) buffer_size << " seconds" << endl;
+  cout << "Doing offline checking " << buffer_size << " times took " << timer_struct->total_offline << " miliseconds" << endl;
+  cout << "Average offline checking took " << (float) timer_struct->total_offline / (float) buffer_size << " seconds" << endl;
+  cout << "Total amount of bytes sent for " << buffer_size << " online checks is " << timer_struct->total_online_bytes << " bytes" << endl;
+  cout << "Average amount of bytes sent for online check is " << (float) timer_struct->total_online_bytes / (float) buffer_size << " bytes" << endl;
 }
 
 std::tuple<CurveElement::Scalar, CurveElement, CurveElement> gen(CurveElement::Scalar sk) {

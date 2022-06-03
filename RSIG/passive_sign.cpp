@@ -1,7 +1,4 @@
-//#include "CurveElement.h"
 #include "Tools/Bundle.h"
-//#include "preprocessing.hpp"
-//#include "Math/gfp.hpp"
 #include <vector>
 #include "party.h"
 #include <tuple>
@@ -120,7 +117,7 @@ void gen_mult_tuple(int n) {
 std::tuple<std::vector<CurveElement>,std::vector<CurveElement>> sign(vector<CurveElement> P, CurveElement I, vector<CurveElement::Scalar> q_values, int position){
   std::vector<CurveElement> L;
   std::vector<CurveElement> R;
-    for (vector<int>::size_type i = 0; i < P.size(); i++){ 
+    for (vector<int>::size_type i = 0; i < P.size(); i++){
       unsigned char h[crypto_hash_sha512_BYTES];
       CurveElement::get_hash(h, P.at(i));
       CurveElement hP = CurveElement::hash_to_group(h);
@@ -144,13 +141,12 @@ return std::make_tuple(L, R);
 
 vector<CurveElement::Scalar> sign2(CurveElement::Scalar c, vector<CurveElement> P, vector<CurveElement::Scalar> w_values, int index) {
   std::vector<CurveElement::Scalar> c_values;
-  //måske til pointder?
   CurveElement::Scalar sum;
     for(vector<int>::size_type j = 0; j < P.size(); j++){
           sum = sum + w_values.at(j);
     }
   for(vector<int>::size_type i = 0; i < P.size(); i++ ){
-      if(index == 3) { 
+      if(index == 3) {
         c_values.push_back(c - sum + w_values.at(i));
       } else {
         CurveElement::Scalar zero;
@@ -158,11 +154,11 @@ vector<CurveElement::Scalar> sign2(CurveElement::Scalar c, vector<CurveElement> 
       }
     }
     return c_values;
-  }  
-  
- 
+  }
 
-  
+
+
+
 RingSignature sign3(CurveElement I, std::vector<CurveElement> P, vector<CurveElement::Scalar> c_values, vector<CurveElement::Scalar> q_values, CurveElement::Scalar a, CurveElement::Scalar b, CurveElement::Scalar c, int index) {
   RingSignature signature;
   std::vector<CurveElement::Scalar> r_values;
@@ -174,7 +170,7 @@ RingSignature sign3(CurveElement I, std::vector<CurveElement> P, vector<CurveEle
        z = ((c + (e_bc_minus_a_sum.at(i) * b)) + (d_x_minus_b_sum.at(i) * a));
      }
      r_values.push_back(q_values.at(i) - z);
-    
+
   }
   signature.keyImage = I;
   signature.challenges = c_values;
@@ -251,15 +247,15 @@ int main(){
   for(vector<int>::size_type i = 0; i < pkSet.size(); i++) {
     vector<CurveElement::Scalar> shares_of_q = genShares(number_of_parties, qs.at(i));
     vector<CurveElement::Scalar> shares_of_w = genShares(number_of_parties, ww.at(i));
-  
+
     for(int j = 0; j < number_of_parties; j++) {
       party_q_share.at(j).push_back(shares_of_q.at(j));
       party_w_share.at(j).push_back(shares_of_w.at(j));
     }
   }
 
-  gen_mult_tuple(number_of_parties);  
-  
+  gen_mult_tuple(number_of_parties);
+
 
   for (int j = 0; j < number_of_parties; j++) {
     vector<CurveElement::Scalar> bit_shares;
@@ -267,10 +263,10 @@ int main(){
       CurveElement::Scalar t = position_shares.at(j) - i;
       CurveElement::Scalar bit_share = eq_testing(t, j, i);
       bit_shares.push_back(bit_share);
-    } 
+    }
     position_bit_shares.push_back(bit_shares);
   }
-  
+
   //Compute multi triple to multiply two shares
   //Compute epsilon and delta and open them to other parties
 
@@ -317,13 +313,13 @@ int main(){
     R_shares.push_back(get<1>(LR));
   }
   vector<CurveElement> L;
-  vector<CurveElement> R;  
+  vector<CurveElement> R;
   for(vector<int>::size_type i = 0; i < L_shares.at(0).size(); i++) {
     CurveElement tmp_L;
     CurveElement tmp_R;
     for(int j = 0; j < number_of_parties; j++) {
-      tmp_L = tmp_L.operator+(L_shares.at(j).at(i)); 
-      tmp_R = tmp_R.operator+(R_shares.at(j).at(i)); 
+      tmp_L = tmp_L.operator+(L_shares.at(j).at(i));
+      tmp_R = tmp_R.operator+(R_shares.at(j).at(i));
     }
     L.push_back(tmp_L);
     R.push_back(tmp_R);
@@ -337,17 +333,17 @@ int main(){
 
   //Compute challenge
   unsigned char* m = reinterpret_cast<unsigned char*>(tx);
-  CurveElement::Scalar challenge = compute_challenge(m, L, R);  
+  CurveElement::Scalar challenge = compute_challenge(m, L, R);
 
   cout  << "outout of hash is " << challenge << endl;
-  
-  
+
+
   vector<vector<CurveElement::Scalar>> party_challenge_share;
   for(int i = 0; i < number_of_parties; i++) {
     vector<CurveElement::Scalar> challenge_shares = sign2(challenge, pkSet,  party_w_share.at(i), i);
     party_challenge_share.push_back(challenge_shares);
   }
-  
+
   for(int i = 0; i < number_of_parties; i++) {
     vector<CurveElement::Scalar> tmp_e;
     vector<CurveElement::Scalar> tmp_d;
@@ -357,7 +353,7 @@ int main(){
     }
     e_bit_minus_a_shares.push_back(tmp_e);
     d_challenge_minus_b_shares.push_back(tmp_d);
-  
+
   }
     for(vector<int>::size_type i = 0; i < pkSet.size() ; i++) {
     CurveElement::Scalar e_sum;
@@ -388,7 +384,7 @@ int main(){
   for(vector<int>::size_type i = 0; i < pkSet.size() ; i++) {
     CurveElement::Scalar sum;
     for(int j = 0; j < number_of_parties; j++) {
-      sum = sum + party_challenge_share.at(j).at(i); 
+      sum = sum + party_challenge_share.at(j).at(i);
     }
     cout <<"challenge is sum " << sum << endl;
     summ = sum + summ;
@@ -470,12 +466,12 @@ cout << "Overall summ should be " << summ << endl;
     signature_shares.push_back(signature);
 
   }
-  
+
 
   //Sum signatures
   vector<CurveElement::Scalar> challenges;
   vector<CurveElement::Scalar> responses;
-  
+
 
   for(vector<int>::size_type i = 0; i < signature_shares.at(0).challenges.size(); i++) {
     CurveElement::Scalar tmp_challenges;
@@ -493,7 +489,7 @@ cout << "Overall summ should be " << summ << endl;
   final_signature.challenges = challenges;
   final_signature.responses = responses;
 
-  assert(check(tx, final_signature, pkSet));  
+  assert(check(tx, final_signature, pkSet));
 
   /*
   CurveElement::Scalar tmp;

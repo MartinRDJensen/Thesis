@@ -18,6 +18,9 @@ struct bench_coll{
   int q_w_L_R;
   int buffer_size_sign = 0;
   int buffer_size_verf = 0;
+  int total_online = 0;
+  int total_offline = 0;
+  int total_online_bytes = 0;
 };
 
 void print_timers(bench_coll* timer_struct, int buffer_size);

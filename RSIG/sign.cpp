@@ -175,7 +175,7 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
   auto VerfTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   // cout << "Verification took: " << VerfTime << " milliseconds" << endl;
   // cout << "Verification took: " << (float) VerfTime / (float) 1000 << " milliseconds" << endl;
-  timer_struct->buffer_size_verf += VerfTime;
+  timer_struct->total_offline += VerfTime;
   return true;
 }
 
@@ -210,6 +210,8 @@ void sign_benchmark(SignatureTransaction* message,
         MCp.Check(P);
         MCc.Check(P);
         auto diff = (check_player.total_comm() - stats);
+        timer_struct->total_online += timer.elapsed() * 1e3;
+        timer_struct->total_online_bytes += diff.sent;
         cout << "Online checking took " << timer.elapsed() * 1e3 << " ms and sending "
             << diff.sent << " bytes" << endl;
         diff.print();
