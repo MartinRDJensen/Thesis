@@ -7,6 +7,8 @@
 
 #include "RSIG/preprocessing.cpp"
 #include "RSIG/sign.cpp"
+#include "Protocols/ProtocolSet.h"
+
 #include "Protocols/Beaver.hpp"
 #include "Protocols/fake-stuff.hpp"
 #include "Protocols/MascotPrep.hpp"
@@ -80,9 +82,9 @@ void run(int argc, const char** argv)
     );
 
     Names N(opt, argc, argv, 2);
-    int n_tuples = 1;
+    int buffer_size = 10;
     if (not opt.lastArgs.empty())
-        n_tuples = atoi(opt.lastArgs[0]->c_str());
+        buffer_size = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
     CurveElement::init();
     CurveElement::Scalar::next::init_field(CurveElement::Scalar::pr(), false);
@@ -111,10 +113,16 @@ void run(int argc, const char** argv)
     timer.start();
     auto stats = P.total_comm();
     sk_prep.get_two(DATA_INVERSE, sk, __);
+
+    // int ged; --- Data_Files.h
+    // pShare idnex;
+    // sk_prep.get_secret_index(DATA_INVERSE, idnex);
+    // cout << idnex;
+    // cin >> ged;
     cout << "Secret key generation took " << timer.elapsed() * 1e3 << " ms" << endl;
     (P.total_comm() - stats).print(true);
 
-    OnlineOptions::singleton.batch_size = (1 + pShare::Protocol::uses_triples) * (n_tuples + 100);
+    OnlineOptions::singleton.batch_size = (1 + pShare::Protocol::uses_triples) * (buffer_size + 100);
     typename pShare::TriplePrep prep(0, usage);
     prep.params.correlation_check &= not opt.isSet("-U");
     prep.params.generateBits = true;
@@ -132,7 +140,7 @@ void run(int argc, const char** argv)
     prep.params.use_extension = not opt.isSet("-S");
 
     bench_coll timer_struct;
-    vector<RSIGTuple<Share>> tuples(n_tuples);
+    vector<RSIGTuple<Share>> tuples(buffer_size);
     // BEGIN FOR HIDING THE RECEIVER
     //THEY DO HAVE THE SIGNER SECRET KEY IN test_keys WHICH IS NOT GOOD
     vector<pShare> skk;
@@ -148,19 +156,9 @@ void run(int argc, const char** argv)
     auto test_keys = gen(sk_open.at(0));
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
-    cout << "Running protocol " << n_tuples << " times" << endl;
-    preprocessing(tuples, opts, proc, n_tuples, publicKeys, get<2>(test_keys), sk, &timer_struct);
-    cout << "starign sign bench" << endl;
-    cout << "starign sign bench" << endl;
-    cout << "starign sign bench" << endl;
-    cout << "starign sign bench" << endl;
-    cout << "starign sign bench" << endl;
+    cout << "Running protocol " << buffer_size << " times" << endl;
+    pShare s = pShare::constant(0, proc.P.my_num(), MCp.get_alphai());
+    preprocessing(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
-    cout << "after sign bench" << endl;
-    cout << "after sign bench" << endl;
-    cout << "after sign bench" << endl;
-    cout << "after sign bench" << endl;
-    cout << "after sign bench" << endl;
-    cout << "after sign bench" << endl;
-    cout << "after sign bench" << endl;
+    print_timers(&timer_struct, buffer_size);
 }

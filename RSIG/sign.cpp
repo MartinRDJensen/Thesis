@@ -58,9 +58,9 @@ RingSignature<T> sign(SignatureTransaction *tx,
     unsigned char* m = reinterpret_cast<unsigned char *>(tx);
     CurveElement::Scalar c = crypto_hash(m, opened_L, opened_R);
 
-     for(int i = 0 ; i < 6 ; i++) {
-       cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;
-     }
+     // for(int i = 0 ; i < 6 ; i++) {
+     //   cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;
+     // }
     auto shareOfC =  scalarShare::constant(c, P.my_num(), MCp.get_alphai());
     scalarShare w;
     for(auto tmp : tuple.w_values) {
@@ -112,8 +112,8 @@ RingSignature<T> sign(SignatureTransaction *tx,
   signature.keyImage = I;
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto SignTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-  cout << "Signing took: " << SignTime << " milliseconds" <<endl;
-  cout << "Signing took: " << (float) SignTime / (float) 1000 << " milliseconds" <<endl;
+  // cout << "Signing took: " << SignTime << " milliseconds" <<endl;
+  // cout << "Signing took: " << (float) SignTime / (float) 1000 << " milliseconds" <<endl;
   timer_struct->buffer_size_sign += SignTime;
   return signature;
 }
@@ -156,25 +156,25 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
   unsigned char *m = reinterpret_cast<unsigned char *>(tx);
   CurveElement::Scalar challenge_prime = crypto_hash(m, L, R);
 
-  for(int i = 0 ; i < 6 ; i++) {
-       cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;
-  }
+  // for(int i = 0 ; i < 6 ; i++) {
+  //      cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;
+  // }
 
 
   CurveElement::Scalar rebuildChallenge;
   for (vector<int>::size_type i = 0; i < publicKeys.size(); i++) {
     rebuildChallenge = rebuildChallenge + opened_c.at(i);
   }
-  cout << "Final verification check becomes" << endl;
-   cout << challenge_prime << "=?=" << rebuildChallenge << endl;
+  // cout << "Final verification check becomes" << endl;
+  //  cout << challenge_prime << "=?=" << rebuildChallenge << endl;
   assert(challenge_prime.operator==(rebuildChallenge));
 
   std::cout << "Offline checking took: " << timer.elapsed() * 1e3 << " ms. "
             << std::endl;
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto VerfTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-  cout << "Verification took: " << VerfTime << " milliseconds" << endl;
-  cout << "Verification took: " << (float) VerfTime / (float) 1000 << " milliseconds" << endl;
+  // cout << "Verification took: " << VerfTime << " milliseconds" << endl;
+  // cout << "Verification took: " << (float) VerfTime / (float) 1000 << " milliseconds" << endl;
   timer_struct->buffer_size_verf += VerfTime;
   return true;
 }
@@ -200,7 +200,7 @@ void sign_benchmark(SignatureTransaction* message,
     Timer timer;
     timer.start();
     auto stats = P.total_comm();
-    for (size_t i = 0; i < max(10lu, tuples.size()); i++)
+    for (size_t i = 0; i < min(10lu, tuples.size()); i++)
     {
         check(sign(message, tuples[i], MCp, MCc, P, sk, I, proc, timer_struct), message, publicKeys, P, MCp, timer_struct);
         Timer timer;

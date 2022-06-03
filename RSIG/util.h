@@ -20,4 +20,5 @@ struct bench_coll{
   int buffer_size_verf = 0;
 };
 
+void print_timers(bench_coll* timer_struct, int buffer_size);
 #endif /* UTIL_H */
