@@ -278,7 +278,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
           th.join();
 	      }
       }
-      auto r = d_bits.at(i).at(j).at(0);
+      /*auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
@@ -287,8 +287,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         protocol.check();
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
-      }
-      /*
+      }*/
       auto r = thread_vals.at(1);
       for(int k = 2; k < num_threads+1; k ++){
         protocol.init_mul();
@@ -299,7 +298,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         auto d = thread_vals.at(k) + r - protocol.finalize_mul();
         r = d;
       }
-      */
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
