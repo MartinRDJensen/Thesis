@@ -102,8 +102,11 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   CurveElement G(1);
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
+  cout << "in preprocessing...." << endl;
   prep.buffer_triples();
+  cout << "After buffer triples" << endl;
   prep.buffer_bits();
+  cout << "After buffer bits" << endl;
   vector<scalarShare> bitters(40);
   for(int i = 0; i < 40; i ++){
     scalarShare teso;
@@ -112,12 +115,13 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
 
   vector<CurveElement::Scalar> bitters_opened(40);
-
+  cout << "Checking bitters?" << endl;
   for(int i = 0; i < buffer_size; i++) {
     MCp.POpen_Begin(bitters_opened, bitters, extra_player);
     MCp.POpen_End(bitters_opened, bitters, extra_player);
     MCp.Check(extra_player);
   }
+  cout << "After Checking bitters?" << endl;
 
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
@@ -209,11 +213,13 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
   vector<vector<CurveElement::Scalar>> c_opened(buffer_size);
 
+  cout << "Checking c opened?" << endl;
   for(int i = 0; i < buffer_size; i++) {
     MCp.POpen_Begin(c_opened.at(i), cShares.at(i), extra_player);
     MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
     MCp.Check(extra_player);
   }
+  cout << " afterChecking c opened?" << endl;
   vector<vector<vector<CurveElement::Scalar>>> c_bits;
 
   for(int i = 0; i < buffer_size; i++) {
@@ -302,12 +308,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
   }
-
-    vector<CurveElement::Scalar> noget(6);
-
-    MCp.POpen_Begin(noget, tuples.at(0).eq_bit_shares, extra_player);
-    MCp.POpen_End(noget, tuples.at(0).eq_bit_shares, extra_player);
-    MCp.Check(extra_player);
 
   end = std::chrono::steady_clock::now();
   auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
