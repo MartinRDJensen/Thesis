@@ -68,6 +68,7 @@ void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
 template<template<class U> class T>
 void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct){
   bool prep_mul = opts.prep_mul;
+  cout << prep_mul << endl;
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -103,7 +104,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
   prep.buffer_bits();
-  int geas = 0;
   vector<scalarShare> bitters(40);
   for(int i = 0; i < 40; i ++){
     scalarShare teso;

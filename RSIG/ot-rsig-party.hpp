@@ -82,7 +82,7 @@ void run(int argc, const char** argv)
     );
 
     Names N(opt, argc, argv, 2);
-    int buffer_size = 10;
+    int buffer_size = 1000;
     if (not opt.lastArgs.empty())
         buffer_size = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -137,6 +137,7 @@ void run(int argc, const char** argv)
     prep.triple_generator->MC = &MCpp;
 
     bool prep_mul = not opt.isSet("-D");
+    cout << prep_mul << endl;
     prep.params.use_extension = not opt.isSet("-S");
 
     bench_coll timer_struct;

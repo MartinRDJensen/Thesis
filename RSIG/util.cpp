@@ -36,19 +36,13 @@ CurveElement::Scalar hash_to_scalar(const unsigned char* h) {
 
 void print_timers(bench_coll* timer_struct, int buffer_size){
   cout << "PRANDM took: " << timer_struct->PRANDM << " miliseconds." << endl;
-  cout << "PRANDM took: " << (float) timer_struct->PRANDM / (float) 1000 << " seconds." << endl;
   cout << "Rest of EQ took: " << timer_struct->EQ_TEST_ALL << " miliseconds." << endl;
-  cout << "Rest of EQ took: " << (float) timer_struct->EQ_TEST_ALL / (float) 1000 << " seconds." << endl;
   cout << "Triple consuming EQ took: " << timer_struct->EQ_TEST_TRIPLE_CONSUME << " miliseconds." << endl;
-  cout << "Triple consuming EQ took: " << (float) timer_struct->EQ_TEST_TRIPLE_CONSUME / (float) 1000 << " seconds." << endl;
   cout << "q,w,L,R generation took: " << timer_struct->q_w_L_R << " miliseconds." << endl;
-  cout << "q,w,L,R generation took: " << (float) timer_struct->q_w_L_R / (float) 1000 << " seconds." << endl;
   cout << "Average sign took: " << (float) timer_struct->buffer_size_sign / (float) buffer_size<< " miliseconds." << endl;
-  cout << "Average sign took: " << ((float) timer_struct->buffer_size_sign / (float) buffer_size) / (float) 1000 << " seconds." << endl;
   cout << "Average verf took: " << (float) timer_struct->buffer_size_verf / (float) buffer_size << " miliseconds." << endl;
-  cout << "Average verf took: " << ((float) timer_struct->buffer_size_verf / (float) buffer_size) / (float) 1000 << " seconds." << endl;
   cout << "Doing online checking " << buffer_size << " times took " << timer_struct->total_online << " miliseconds" << endl;
-  cout << "Average online checking took " << (float) timer_struct->total_online / (float) buffer_size << " seconds" << endl;
+  cout << "Average online checking took " << (float) timer_struct->total_online / (float) buffer_size << " miliseconds" << endl;
   cout << "Doing offline checking " << buffer_size << " times took " << timer_struct->total_offline << " miliseconds" << endl;
   cout << "Average offline checking took " << (float) timer_struct->total_offline / (float) buffer_size << " seconds" << endl;
   cout << "Total amount of bytes sent for " << buffer_size << " online checks is " << timer_struct->total_online_bytes << " bytes" << endl;

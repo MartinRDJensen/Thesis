@@ -31,7 +31,7 @@ int main(int argc, const char** argv){
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
     //int n_tuples = 1000;
-    int buffer_size = 10;
+    int buffer_size = 1000;
     if (not opt.lastArgs.empty())
         buffer_size = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -49,6 +49,13 @@ int main(int argc, const char** argv){
     ArithmeticProcessor _({}, 0);
     BaseMachine machine;
     machine.ot_setups.push_back({P, false});
+    BaseMachine machine_;
+    machine_.ot_setups.push_back({P, false});
+
+    int offset = rand() % 100 + 1;
+    machine.thread_num = (P.my_num() + 1) * offset;
+    machine_.thread_num = (P.my_num() + 1) * (offset+1);
+
     // machine.thread_num = P.my_num();
     SubProcessor<pShare> proc(_, MCp, prep, P);
     vector<CurveElement::Scalar> tmp(1);
