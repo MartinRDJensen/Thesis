@@ -92,6 +92,12 @@ void run(int argc, const char** argv)
     BaseMachine machine;
     machine.ot_setups.push_back({P, true});
 
+    BaseMachine machinea;
+    machinea.ot_setups.push_back({P, true});
+
+    int offset = rand() % 100 + 1;
+    machine.thread_num = (P.my_num() + 1) * (offset + 1);
+    machinea.thread_num = (P.my_num() + 1) * (offset);
     CurveElement::Scalar keyp;
     SeededPRNG G;
     keyp.randomize(G);

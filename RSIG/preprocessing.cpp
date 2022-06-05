@@ -134,7 +134,9 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
 //PRANDMULT
   auto rng = default_random_engine {};
   chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+  cout << "shuffle part" << endl;
   for(int i = 0; i < buffer_size; i++){
+    cout << "buffersize is: " << i << endl;
     for(int j = 0; j < number_of_parties; j++){
       scalarShare r_prime_prime;
       shuffle(std::begin(bitters), std::end(bitters), rng);
@@ -151,8 +153,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     //   prep.get_two(DATA_INVERSE, _, r);
     // rrShares.at(i).push_back(r);
     // }
+  cout << "Doing r shares" << endl;
   vector<vector<scalarShare>> rShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
+    cout << "buffersize is: " << i << endl;
     vector<vector<scalarShare>> tmp;
     for(int j = 0; j < number_of_parties; j++) {
       vector<scalarShare> tmp1;
@@ -165,7 +169,9 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
     bitShares.push_back(tmp);
   }
+  cout << "Done loading bits" << endl;
   for(int i = 0; i < buffer_size; i++) {
+    cout << "buffersize is: " << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare r_prime;
       CurveElement::Scalar two = 1;
@@ -180,12 +186,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       rShares.at(i).push_back(r_prime);
     }
   }
+  cout << "Done with r shares" << endl;
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto PRANDM = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   timer_struct->PRANDM = PRANDM;
-  //std::cout << "PRANDM Took: " << PRANDM << " miliseconds" << std::endl;
-  //std::cout << "PRANDM Took: " << (float) PRANDM / (float) 1000 << " [s]" << std::endl;
-  //PRANDM(bitShares, rShares, buffer_size, number_of_parties);
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
@@ -193,9 +197,12 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
+
   begin = std::chrono::steady_clock::now();
+  cout << "Startingg cshares" << endl;
   vector<vector<scalarShare>> cShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
+    cout << "buffersize is: " << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
       CurveElement::Scalar two = 1;
       for(int k = 0; k < 41; k++) {
@@ -211,6 +218,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       cShares.at(i).push_back(c);
     }
   }
+  cout << "after Startingg cshares" << endl;
   vector<vector<CurveElement::Scalar>> c_opened(buffer_size);
 
   cout << "Checking c opened?" << endl;
@@ -260,9 +268,11 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
   vector<thread> threads;
+  cout << "Starting the rough loop" << endl;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
+    cout << "Doing buffer size " << i << " for pk " << j << endl;
       for(int ID = 1; ID <= num_threads; ID++){
         int low = (EQ_K / num_threads)*(ID-1);
         int high = (EQ_K / num_threads) * ID;
