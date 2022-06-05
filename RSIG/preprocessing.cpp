@@ -114,15 +114,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     bitters.at(i) = teso;
   }
 
-  vector<CurveElement::Scalar> bitters_opened(40);
-  cout << "Checking bitters?" << endl;
-  for(int i = 0; i < buffer_size; i++) {
-    MCp.POpen_Begin(bitters_opened, bitters, extra_player);
-    MCp.POpen_End(bitters_opened, bitters, extra_player);
-    MCp.Check(extra_player);
-  }
-  cout << "After Checking bitters?" << endl;
-
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
@@ -159,11 +150,19 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     cout << "buffersize is: " << i << endl;
     vector<vector<scalarShare>> tmp;
     for(int j = 0; j < number_of_parties; j++) {
-      vector<scalarShare> tmp1;
+      cout << "vector create" << endl;
+      vector<scalarShare> tmp1(40);
+      cout << "vector created" << endl;
       for(int k = 0; k < 40 ; k++) {
+        cout << "loading bits start k: " << k << endl;
         scalarShare bitShare;
+        cout << "1" << endl;
         prep.get_one(DATA_BIT, bitShare);
-        tmp1.push_back(bitShare);
+        cout << "2" << endl;
+        tmp1.at(k) = bitShare;
+        cout << "3" << endl;
+        //tmp1.push_back(bitShare);
+        cout << "loading bits end k: " << k << endl;
       }
       tmp.push_back(tmp1);
     }
@@ -273,7 +272,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
     cout << "Doing buffer size " << i << " for pk " << j << endl;
-      for(int ID = 1; ID <= num_threads; ID++){
+     /* for(int ID = 1; ID <= num_threads; ID++){
         int low = (EQ_K / num_threads)*(ID-1);
         int high = (EQ_K / num_threads) * ID;
         //cout << "low: " << low << " high: " << high << endl;
@@ -293,8 +292,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         if (th.joinable()){
           th.join();
 	      }
-      }
-      /*auto r = d_bits.at(i).at(j).at(0);
+      }*/
+      auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
@@ -303,7 +302,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         protocol.check();
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
-      }*/
+      }
+      /*
       auto r = thread_vals.at(1);
       for(int k = 2; k < num_threads+1; k ++){
         protocol.init_mul();
@@ -313,7 +313,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         protocol.check();
         auto d = thread_vals.at(k) + r - protocol.finalize_mul();
         r = d;
-      }
+      }*/
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
