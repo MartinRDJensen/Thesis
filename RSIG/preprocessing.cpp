@@ -445,7 +445,7 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
-
+  cout << "first loop" << endl;
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
       scalarShare _, r;
@@ -454,6 +454,7 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
     }
   }
 
+  cout << "second loop" << endl;
   for(int i = 0; i < buffer_size; i++) {
     vector<vector<scalarShare>> tmp;
     for(int j = 0; j < number_of_parties; j++) {
@@ -471,6 +472,7 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
 
   vector<vector<scalarShare>> rShares(buffer_size);
 
+  cout << "third loop" << endl;
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare r_prime;
@@ -488,6 +490,8 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
   }
 
   vector<vector<scalarShare>> cShares(buffer_size);
+
+  cout << "fourth loop" << endl;
 
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
@@ -513,14 +517,17 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
   }
 
   vector<vector<CurveElement::Scalar>> c_opened(buffer_size);
+  cout << "fifth loop" << endl;
 
   for(int i = 0; i < buffer_size; i++) {
+    cout << "checking cShares.... i is: " << i << endl;
     MCp.POpen_Begin(c_opened.at(i), cShares.at(i), extra_player);
     MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
     MCp.Check(extra_player);
   }
 
   vector<vector<vector<CurveElement::Scalar>>> c_bits;
+  cout << "six loop" << endl;
 
   for(int i = 0; i < buffer_size; i++) {
     vector<vector<CurveElement::Scalar>> tmp;
@@ -544,6 +551,7 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
   }
 
   vector<vector<vector<scalarShare>>> d_bits = bitShares;
+  cout << "seven loop" << endl;
 
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
@@ -560,40 +568,53 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
   }
 
   vector<vector<scalarShare>> z(buffer_size);
+  cout << "8 big loop" << endl;
 
   for(int i = 0; i < buffer_size; i++) {
+    cout << "big loop i: " << i << endl;
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare sum;
+      protocol.init_mul();
       auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
-        protocol.init_mul();
+        cout << "buffer_size: " << i << endl;
+        cout << "k = " <<k << ", 1, " << "sign key is: " << j << endl;
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
+        cout << "k = "<<  k << ", 2" << endl;
         protocol.start_exchange();
+        cout << "k = "<<  k << ", 2" << endl;
         protocol.stop_exchange();
+        cout << "k = "<<  k << ", 4" << endl;
         protocol.check();
+        cout << "k = "<<  k << ", 5" << endl;
+        cout << d_bits.at(i).at(j).at(k) << endl;
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
+        cout << "k = "<<  k << ", 6" << endl;
         r = d;
       }
-
+        cout << "7" << endl;
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
+        cout << "8" << endl;
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
   }
-
-    vector<CurveElement::Scalar> noget(40);
-    MCp.POpen_Begin(noget, tuples.at(0).eq_bit_shares, extra_player);
-    MCp.POpen_End(noget, tuples.at(0).eq_bit_shares, extra_player);
-    MCp.Check(extra_player);
-
-
+  // cout << "9 checking" << endl;
+  //   vector<CurveElement::Scalar> noget(40);
+  //   MCp.POpen_Begin(noget, tuples.at(0).eq_bit_shares, extra_player);
+  //   MCp.POpen_End(noget, tuples.at(0).eq_bit_shares, extra_player);
+  //   MCp.Check(extra_player);
+  // cout
+  //
 
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
+  cout << "got here 1" << endl;
   auto shareOfOne =  scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
   for(int j = 0; j < buffer_size; j++){
     for(int i = 0; i < number_of_parties; i++){
       scalarShare q, w, _tmp;
       prep.get_three(DATA_TRIPLE, q, w, _tmp);
+      cout << "got data triple" << " buffer: " << i << ", party: " << j << endl;
       qs.at(j).push_back(q);
       ws.at(j).push_back(w);
     }
@@ -602,24 +623,41 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
     tuples.at(j).w_values = ws.at(j);
 
   }
+  cout << "got here 2" << endl;
 
 
-  protocol.init_mul();
+  // protocol.init_mul();
+  // for(int i = 0; i < buffer_size; i++){
+  //   for(int j = 0; j < number_of_parties; j++){
+  //     protocol.prepare_mul(ws.at(i).at(j), shareOfOne - tuples.at(i).eq_bit_shares.at(j));
+  //   }
+  // }
+  // cout << "got here 3 before start" << endl;
+  // protocol.exchange();
+  // cout << "got here 5" << endl;
+  // protocol.check();
+  // cout << "got here 6" << endl;
+  // for(int i = 0; i < buffer_size; i++){
+  //   for(int j = 0; j < number_of_parties; j ++){
+  //     auto tmp = protocol.finalize_mul();
+  //     w_mul_const_sub_b.at(i).push_back(tmp);
+  //   }
+  //   tuples.at(i).w_mul_const_sub_bit = w_mul_const_sub_b.at(i);
+  // }
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
-      protocol.prepare_mul(ws.at(i).at(j), shareOfOne - tuples.at(i).eq_bit_shares.at(j));
-    }
-  }
-  protocol.start_exchange();
-  protocol.stop_exchange();
-  protocol.check();
-  for(int i = 0; i < buffer_size; i++){
-    for(int j = 0; j < number_of_parties; j ++){
-      auto tmp = protocol.finalize_mul();
-      w_mul_const_sub_b.at(i).push_back(tmp);
+
+    protocol.init_mul();
+    protocol.prepare_mul(ws.at(i).at(j), shareOfOne - tuples.at(i).eq_bit_shares.at(j));
+    protocol.start_exchange();
+    protocol.stop_exchange();
+    protocol.check();
+    auto tmp = protocol.finalize_mul();
+    w_mul_const_sub_b.at(i).push_back(tmp);
     }
     tuples.at(i).w_mul_const_sub_bit = w_mul_const_sub_b.at(i);
   }
+  cout << "got here 4" << endl;
 
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
