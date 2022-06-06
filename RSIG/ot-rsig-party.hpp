@@ -92,12 +92,12 @@ void run(int argc, const char** argv)
     BaseMachine machine;
     machine.ot_setups.push_back({P, true});
 
-    BaseMachine machinea;
-    machinea.ot_setups.push_back({P, true});
+    // BaseMachine machinea;
+    // machinea.ot_setups.push_back({P, true});
 
-    int offset = rand() % 100 + 1;
-    machine.thread_num = (P.my_num() + 1) * (offset + 1);
-    machinea.thread_num = (P.my_num() + 1) * (offset);
+    // int offset = rand() % 100 + 1;
+    // machine.thread_num = (P.my_num() + 1) * (offset + 1);
+    // machinea.thread_num = (P.my_num() + 1) * (offset);
     CurveElement::Scalar keyp;
     SeededPRNG G;
     keyp.randomize(G);
@@ -128,7 +128,7 @@ void run(int argc, const char** argv)
     cout << "Secret key generation took " << timer.elapsed() * 1e3 << " ms" << endl;
     (P.total_comm() - stats).print(true);
 
-    OnlineOptions::singleton.batch_size = (1 + pShare::Protocol::uses_triples) * (buffer_size + 100);
+    OnlineOptions::singleton.batch_size = (1 + pShare::Protocol::uses_triples) * (buffer_size );//+ 100);
     typename pShare::TriplePrep prep(0, usage);
     prep.params.correlation_check &= not opt.isSet("-U");
     prep.params.generateBits = true;
