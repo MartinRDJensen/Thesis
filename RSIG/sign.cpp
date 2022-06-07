@@ -200,7 +200,7 @@ void sign_benchmark(SignatureTransaction* message,
     Timer timer;
     timer.start();
     auto stats = P.total_comm();
-    for (size_t i = 0; i < min(10lu, tuples.size()); i++)
+    for (size_t i = 0; i < max(10lu, tuples.size()); i++)
     {
         check(sign(message, tuples[i], MCp, MCc, P, sk, I, proc, timer_struct), message, publicKeys, P, MCp, timer_struct);
         Timer timer;

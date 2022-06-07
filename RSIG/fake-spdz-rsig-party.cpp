@@ -31,7 +31,7 @@ int main(int argc, const char** argv){
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 2);
     //int n_tuples = 1000;
-    int buffer_size = 1000;
+    int buffer_size = 100;
     if (not opt.lastArgs.empty())
         buffer_size = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -46,10 +46,16 @@ int main(int argc, const char** argv){
     DataPositions usage;
     Sub_Data_Files<pShare> prep(N, prefix, usage);
     typename pShare::Direct_MC MCp(keyp);
-    ArithmeticProcessor _({}, 0);
+  //prøv old med 2 procs send med..
+  ////prøv old med 2 procs send med....
+    ArithmeticProcessor _({}, 1);
+    ArithmeticProcessor _b({}, 2);
     BaseMachine machine;
     machine.ot_setups.push_back({P, false});
-
+    BaseMachine machine_;
+    machine_.ot_setups.push_back({P, false});
+    machine.thread_num = 1;
+    machine_.thread_num = 2;
     SubProcessor<pShare> proc(_, MCp, prep, P);
     vector<CurveElement::Scalar> tmp(1);
     pShare sk, s;
