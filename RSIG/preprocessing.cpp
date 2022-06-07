@@ -78,15 +78,15 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   cout << "in preprocessing...." << endl;
   prep.buffer_triples();
   cout << "After buffer triples" << endl;
-  prep.buffer_bits();
+  //prep.buffer_bits();
   //maybe check if mascot do
   //cout << "After buffer bits" << endl;
-  vector<scalarShare> bitters(40);
+  /*vector<scalarShare> bitters(40);
   for(int i = 0; i < 40; i ++){
     scalarShare teso;
     prep.get_one(DATA_BIT, teso);
     bitters.at(i) = teso;
-  }
+  }*/
 
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
@@ -97,6 +97,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
 //PRANDMULT
 //PRANDMULT
 //PRANDMULT
+  /*
   auto rng = default_random_engine {};
   chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   cout << "shuffle part" << endl;
@@ -112,7 +113,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       }
       rrShares.at(i).push_back(r_prime_prime);
       }
-    }
+    }*/
         // for(int j = 0; j < number_of_parties; j++){
     //   scalarShare _, r;
     //   prep.get_two(DATA_INVERSE, _, r);
