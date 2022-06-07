@@ -58,9 +58,9 @@ RingSignature<T> sign(SignatureTransaction *tx,
     unsigned char* m = reinterpret_cast<unsigned char *>(tx);
     CurveElement::Scalar c = crypto_hash(m, opened_L, opened_R);
 
-     // for(int i = 0 ; i < 6 ; i++) {
-     //   cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;
-     // }
+      for(int i = 0 ; i < 6 ; i++) {
+        cout << "L IS " << opened_L.at(i) << " and R is " << opened_R.at(i) << endl;
+      }
     auto shareOfC =  scalarShare::constant(c, P.my_num(), MCp.get_alphai());
     scalarShare w;
     for(auto tmp : tuple.w_values) {
@@ -156,17 +156,17 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
   unsigned char *m = reinterpret_cast<unsigned char *>(tx);
   CurveElement::Scalar challenge_prime = crypto_hash(m, L, R);
 
-  // for(int i = 0 ; i < 6 ; i++) {
-  //      cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;
-  // }
+   for(int i = 0 ; i < 6 ; i++) {
+        cout << "L IS " << L.at(i) << " and R is " << R.at(i) << endl;
+   }
 
 
   CurveElement::Scalar rebuildChallenge;
   for (vector<int>::size_type i = 0; i < publicKeys.size(); i++) {
     rebuildChallenge = rebuildChallenge + opened_c.at(i);
   }
-  // cout << "Final verification check becomes" << endl;
-  //  cout << challenge_prime << "=?=" << rebuildChallenge << endl;
+  cout << "Final verification check becomes" << endl;
+  cout << challenge_prime << "=?=" << rebuildChallenge << endl;
   assert(challenge_prime.operator==(rebuildChallenge));
 
   std::cout << "Offline checking took: " << timer.elapsed() * 1e3 << " ms. "

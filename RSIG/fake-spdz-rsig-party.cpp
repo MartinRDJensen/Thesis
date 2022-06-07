@@ -64,7 +64,7 @@ int main(int argc, const char** argv){
     auto test_keys = gen(skk);
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
-    fake(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct);
+    preprocessing(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
     print_timers(&timer_struct, buffer_size);
 }
