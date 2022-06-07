@@ -56,6 +56,7 @@ public:
 
 template<template<class U> class T>
 void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
+  cout << "line 1" << endl;
   bool prep_mul = opts.prep_mul;
   cout << prep_mul << endl;
   Timer timer;
@@ -76,6 +77,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
+  cout << "line 20" << endl;
   //maybe check if mascot do
   //cout << "After buffer bits" << endl;
   vector<scalarShare> bitters(40);
@@ -96,6 +98,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
 //PRANDMULT
 //PRANDMULT
 //PRANDMULT
+  cout << "line 40" << endl;
 //PRANDMULT
   chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
@@ -103,7 +106,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   auto rng = default_random_engine {};
   cout << "shuffle part" << endl;
   for(int i = 0; i < buffer_size; i++){
-    cout << "buffersize is: " << i << endl;
     for(int j = 0; j < number_of_parties; j++){
       scalarShare r_prime_prime;
       shuffle(std::begin(bitters), std::end(bitters), rng);
@@ -116,8 +118,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       }
     }
     }
-
   else {
+  cout << "line 60" << endl;
     for(int i = 0; i < buffer_size; i++){
          for(int j = 0; j < number_of_parties; j++){
        scalarShare _, r;
@@ -141,6 +143,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
     bitShares.push_back(tmp);
   }
+  cout << "line 80" << endl;
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
       scalarShare r_prime;
@@ -159,6 +162,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto PRANDM = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   timer_struct->PRANDM = PRANDM;
+  cout << "line 100" << endl;
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
   //EQUALITY TESTING PROTOCOL 2
@@ -185,6 +189,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   }
   vector<vector<CurveElement::Scalar>> c_opened(buffer_size);
 
+  cout << "line 120" << endl;
   for(int i = 0; i < buffer_size; i++) {
     MCp.POpen_Begin(c_opened.at(i), cShares.at(i), extra_player);
     MCp.POpen_End(c_opened.at(i), cShares.at(i), extra_player);
@@ -211,6 +216,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
     c_bits.push_back(tmp);
   }
+  cout << "line 140" << endl;
 
   vector<vector<vector<scalarShare>>> d_bits = bitShares;
 
@@ -227,6 +233,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       }
     }
   }
+  cout << "line 160" << endl;
   // vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
   // vector<thread> threads;
@@ -279,6 +286,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
   }
+  cout << "line 10" << endl;
 
   end = std::chrono::steady_clock::now();
   auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
@@ -319,8 +327,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
       protocol.prepare_mul(ws.at(i).at(j), shareOfOne - tuples.at(i).eq_bit_shares.at(j));
     }
   }
+  cout << "kekw" << endl;
   protocol.start_exchange();
   protocol.stop_exchange();
+  cout << "kekw" << endl;
   protocol.check();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j ++){
@@ -404,7 +414,7 @@ void fake(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveEl
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
-  vector<vector<vector<scalarShare>>> bitShares;
+  vector<vector<vector<scalarShare>>> bitShares(buffer_size);
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
   cout << "first loop" << endl;

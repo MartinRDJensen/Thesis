@@ -44,7 +44,7 @@ void print_timers(bench_coll* timer_struct, int buffer_size){
   cout << "Doing online checking " << buffer_size << " times took " << timer_struct->total_online << " miliseconds" << endl;
   cout << "Average online checking took " << (float) timer_struct->total_online / (float) buffer_size << " miliseconds" << endl;
   cout << "Doing offline checking " << buffer_size << " times took " << timer_struct->total_offline << " miliseconds" << endl;
-  cout << "Average offline checking took " << (float) timer_struct->total_offline / (float) buffer_size << " seconds" << endl;
+  cout << "Average offline checking took " << (float) timer_struct->total_offline / (float) buffer_size << " miliseconds" << endl;
   cout << "Total amount of bytes sent for " << buffer_size << " online checks is " << timer_struct->total_online_bytes << " bytes" << endl;
   cout << "Average amount of bytes sent for online check is " << (float) timer_struct->total_online_bytes / (float) buffer_size << " bytes" << endl;
 }
