@@ -57,6 +57,7 @@ int main(int argc, const char** argv){
     machine.thread_num = 1;
     machine_.thread_num = 2;
     SubProcessor<pShare> proc(_, MCp, prep, P);
+    SubProcessor<pShare> proc2(_b, MCp, prep, P);
     vector<CurveElement::Scalar> tmp(1);
     pShare sk, s;
     proc.DataF.get_two(DATA_INVERSE, sk, s);
@@ -70,7 +71,7 @@ int main(int argc, const char** argv){
     auto test_keys = gen(skk);
     SignatureTransaction *tx = genTransaction(get<2>(test_keys));
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
-    preprocessing(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 1);
+    preprocessing(tuples, opts, proc, proc2, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 1);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
     print_timers(&timer_struct, buffer_size);
 }

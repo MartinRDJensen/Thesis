@@ -31,31 +31,31 @@ public:
   vector<T<CurveElement::Scalar>> w_values;
 };
 
-//static int num_threads = 1;
-// static int EQ_K = 40;
-// template<template<class U> class T>
-// void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
-//                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
-//                    int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
-  //
-  // auto r = d_bits->at(low);
-  // cout << "WE GOT ID AS: " << ID << endl;
-  // for(int k = low+1; k < high; k++) {
-  //   auto curr = d_bits->at(k);
-  //   protocol->init_mul();
-  //   protocol->prepare_mul(curr, r);
-  //   protocol->start_exchange();
-  //   protocol->stop_exchange();
-  //   protocol->check();
-  //   auto d = curr + r - protocol->finalize_mul();
-  //   r = d;
-  // }
-  // cout << "THREAD_VALS->at("<<ID<<")"<<endl;
-  // thread_vals->at(1) = r;
-// }
+static int num_threads = 1;
+static int EQ_K = 40;
+template<template<class U> class T>
+void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
+                   vector<T<CurveElement::Scalar>> *thread_vals, int ID,
+                   int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
+
+  auto r = d_bits->at(low);
+  cout << "WE GOT ID AS: " << ID << endl;
+  for(int k = low+1; k < high; k++) {
+    auto curr = d_bits->at(k);
+    protocol->init_mul();
+    protocol->prepare_mul(curr, r);
+    protocol->start_exchange();
+    protocol->stop_exchange();
+    protocol->check();
+    auto d = curr + r - protocol->finalize_mul();
+    r = d;
+  }
+  cout << "THREAD_VALS->at("<<ID<<")"<<endl;
+  thread_vals->at(1) = r;
+}
 
 template<template<class U> class T>
-void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
+void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, SubProcessor<T<CurveElement::Scalar>>& proc2, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
   cout << "line 1" << endl;
   bool prep_mul = opts.prep_mul;
   cout << prep_mul << endl;
@@ -68,6 +68,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   auto& extra_player = P;
 
   auto& protocol = proc.protocol;
+  auto& protocola = proc2.protocol;
+
   auto& MCp = proc.MC;
   typedef T<typename CurveElement::Scalar> scalarShare;
   typedef T<CurveElement> pointShare;
@@ -83,6 +85,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
   vector<scalarShare> bitters(40);
   if (flag == 0){
     prep.buffer_bits();
+    cout << "we buffer bits" << endl;
     for(int i = 0; i < 40; i ++){
       scalarShare teso;
       prep.get_one(DATA_BIT, teso);
@@ -234,33 +237,42 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
     }
   }
   cout << "line 160" << endl;
-  // vector<scalarShare> thread_vals(num_threads+10);
+  vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  // vector<thread> threads;
+  vector<thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
-     /* for(int ID = 1; ID <= num_threads; ID++){
-        int low = (EQ_K / num_threads)*(ID-1);
-        int high = (EQ_K / num_threads) * ID;
-        //cout << "low: " << low << " high: " << high << endl;
-        if (ID == num_threads && EQ_K % num_threads != 0){
-          high += 1;
-        }
-	cout << "ID IS: " << ID << endl;
-	cout << "ID IS: " << ID << endl;
-        thread testa([&] () {
-          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
-                     });
-	cout << "ID IS: " << ID << endl;
-	cout << "ID IS: " << ID << endl;
-        threads.push_back(std::move(testa));
+      thread testa([&] () {
+          thread_worker(&d_bits.at(i).at(j), &thread_vals, 1, 0, (EQ_K / num_threads) * 1, &protocol);
+      });
+      thread testaaj([&] () {
+          thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(ID - 1), (EQ_K / num_threads) * 2, &protocola);
+      });
+      threads.push_back(testa);
+      threads.push_back(testaaj);
+ //      for(int ID = 1; ID <= num_threads; ID++){
+ //        int low = (EQ_K / num_threads)*(ID-1);
+ //        int high = (EQ_K / num_threads) * ID;
+ //        //cout << "low: " << low << " high: " << high << endl;
+ //        if (ID == num_threads && EQ_K % num_threads != 0){
+ //          high += 1;
+ //        }
+	// cout << "ID IS: " << ID << endl;
+	// cout << "ID IS: " << ID << endl;
+ //        thread testa([&] () {
+ //          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
+ //                     });
+	// cout << "ID IS: " << ID << endl;
+	// cout << "ID IS: " << ID << endl;
+ //        threads.push_back(std::move(testa));
       }
       for(auto &th : threads){
         if (th.joinable()){
           th.join();
 	      }
-      }*/
+      }
+      // IS NOT APPLICABLE WHEN THREADING START
       auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
@@ -271,7 +283,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
       }
-      /*
+      // IS NOT APPLICABLE WHEN THREADING END
+
       auto r = thread_vals.at(1);
       for(int k = 2; k < num_threads+1; k ++){
         protocol.init_mul();
@@ -281,7 +294,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts, SubProcessor<
         protocol.check();
         auto d = thread_vals.at(k) + r - protocol.finalize_mul();
         r = d;
-      }*/
+      }
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
