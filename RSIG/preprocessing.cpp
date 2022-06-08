@@ -31,31 +31,33 @@ public:
   vector<T<CurveElement::Scalar>> w_values;
 };
 
-static int num_threads = 1;
-static int EQ_K = 40;
-template<template<class U> class T>
-void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
-                   vector<T<CurveElement::Scalar>> *thread_vals, int ID,
-                   int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
+// static int num_threads = 2;
+// static int EQ_K = 40;
+// template<template<class U> class T>
+// void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
+//                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
+//                    int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
+//
+//   auto r = d_bits->at(low);
+//   cout << "WE GOT ID AS: " << ID << endl;
+//   for(int k = low+1; k < high; k++) {
+//     cout << "before k: " << k << endl;
+//     auto curr = d_bits->at(k);
+//     cout << "after k: " << k << endl;
+//     protocol->init_mul();
+//     protocol->prepare_mul(curr, r);
+//     protocol->start_exchange();
+//     protocol->stop_exchange();
+//     protocol->check();
+//     auto d = curr + r - protocol->finalize_mul();
+//     r = d;
+//   }
+//   cout << "THREAD_VALS->at("<<ID<<")"<<endl;
+//   thread_vals->at(1) = r;
+// }
 
-  auto r = d_bits->at(low);
-  cout << "WE GOT ID AS: " << ID << endl;
-  for(int k = low+1; k < high; k++) {
-    auto curr = d_bits->at(k);
-    protocol->init_mul();
-    protocol->prepare_mul(curr, r);
-    protocol->start_exchange();
-    protocol->stop_exchange();
-    protocol->check();
-    auto d = curr + r - protocol->finalize_mul();
-    r = d;
-  }
-  cout << "THREAD_VALS->at("<<ID<<")"<<endl;
-  thread_vals->at(1) = r;
-}
-
 template<template<class U> class T>
-void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, SubProcessor<T<CurveElement::Scalar>>& proc2, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
+void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
   cout << "line 1" << endl;
   bool prep_mul = opts.prep_mul;
   cout << prep_mul << endl;
@@ -68,7 +70,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   auto& extra_player = P;
 
   auto& protocol = proc.protocol;
-  auto& protocola = proc2.protocol;
 
   auto& MCp = proc.MC;
   typedef T<typename CurveElement::Scalar> scalarShare;
@@ -106,31 +107,31 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
   if(flag == 0){
-  auto rng = default_random_engine {};
-  cout << "shuffle part" << endl;
-  for(int i = 0; i < buffer_size; i++){
-    for(int j = 0; j < number_of_parties; j++){
-      scalarShare r_prime_prime;
-      shuffle(std::begin(bitters), std::end(bitters), rng);
-      for(int inner = 0; inner < 40; inner ++){
-        scalarShare curr = bitters.at(inner);
-        auto c = powerMod(2, inner, (bigint(1) << 40));
-        r_prime_prime += curr * c;
-      }
-      rrShares.at(i).push_back(r_prime_prime);
-      }
-    }
-    }
-  else {
-  cout << "line 60" << endl;
+    auto rng = default_random_engine {};
+    cout << "shuffle part" << endl;
     for(int i = 0; i < buffer_size; i++){
-         for(int j = 0; j < number_of_parties; j++){
-       scalarShare _, r;
-       prep.get_two(DATA_INVERSE, _, r);
-     rrShares.at(i).push_back(r);
-     }
-  }
+      for(int j = 0; j < number_of_parties; j++){
+        scalarShare r_prime_prime;
+        shuffle(std::begin(bitters), std::end(bitters), rng);
+        for(int inner = 0; inner < 40; inner ++){
+          scalarShare curr = bitters.at(inner);
+          auto c = powerMod(2, inner, (bigint(1) << 40));
+          r_prime_prime += curr * c;
+        }
+        rrShares.at(i).push_back(r_prime_prime);
       }
+    }
+  }
+  else {
+    cout << "line 60" << endl;
+    for(int i = 0; i < buffer_size; i++){
+      for(int j = 0; j < number_of_parties; j++){
+        scalarShare _, r;
+        prep.get_two(DATA_INVERSE, _, r);
+        rrShares.at(i).push_back(r);
+      }
+    }
+  }
   vector<vector<scalarShare>> rShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
     vector<vector<scalarShare>> tmp;
@@ -152,12 +153,12 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
       scalarShare r_prime;
       CurveElement::Scalar two = 1;
       for(int k = 0; k < 40; k++) {
-          if( k != 0) {
-            CurveElement::Scalar tmp = 2;
-            two = two * tmp;
-          }
-          auto r = two * bitShares.at(i).at(j).at(k);
-          r_prime = r_prime + r;
+        if( k != 0) {
+          CurveElement::Scalar tmp = 2;
+          two = two * tmp;
+        }
+        auto r = two * bitShares.at(i).at(j).at(k);
+        r_prime = r_prime + r;
       }
       rShares.at(i).push_back(r_prime);
     }
@@ -237,20 +238,20 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
     }
   }
   cout << "line 160" << endl;
-  vector<scalarShare> thread_vals(num_threads+10);
+  // vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  vector<std::thread> threads;
+  // vector<std::thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
-      thread testa([&] () {
-          thread_worker(&d_bits.at(i).at(j), &thread_vals, 1, 0, (EQ_K / num_threads) * 1, &protocol);
-      });
-      thread testaaj([&] () {
-          thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(2 - 1), (EQ_K / num_threads) * 2, &protocola);
-      });
-      threads.push_back(std::move(testa));
-      threads.push_back(std::move(testaaj));
+      // thread testa([&] () {
+      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 1, 0, (EQ_K / num_threads) * 1, &protocol);
+      // });
+      // thread testaaj([&] () {
+      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(2 - 1), (EQ_K / num_threads) * 2, &protocola);
+      // });
+      // threads.push_back(std::move(testa));
+      // threads.push_back(std::move(testaaj));
  //      for(int ID = 1; ID <= num_threads; ID++){
  //        int low = (EQ_K / num_threads)*(ID-1);
  //        int high = (EQ_K / num_threads) * ID;
@@ -267,13 +268,15 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
 	// cout << "ID IS: " << ID << endl;
  //        threads.push_back(std::move(testa));
       //}
-      for(auto &th : threads){
-        if (th.joinable()){
-          th.join();
-	      }
-      }
+      // cout << "Before thread joins" << endl;
+      // for(auto &th : threads){
+      //   if (th.joinable()){
+      //     th.join();
+	     //  }
+      // }
+      // cout << "After thread joins" << endl;
       // IS NOT APPLICABLE WHEN THREADING START
-      /*auto r = d_bits.at(i).at(j).at(0);
+      auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
@@ -282,19 +285,19 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
         protocol.check();
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
-      }*/
+      }
       // IS NOT APPLICABLE WHEN THREADING END
 
-      auto r = thread_vals.at(1);
-      for(int k = 2; k < num_threads+1; k ++){
-        protocol.init_mul();
-        protocol.prepare_mul(thread_vals.at(k),r);
-        protocol.start_exchange();
-        protocol.stop_exchange();
-        protocol.check();
-        auto d = thread_vals.at(k) + r - protocol.finalize_mul();
-        r = d;
-      }
+      // auto r = thread_vals.at(1);
+      // for(int k = 2; k < num_threads+1; k ++){
+      //   protocol.init_mul();
+      //   protocol.prepare_mul(thread_vals.at(k),r);
+      //   protocol.start_exchange();
+      //   protocol.stop_exchange();
+      //   protocol.check();
+      //   auto d = thread_vals.at(k) + r - protocol.finalize_mul();
+      //   r = d;
+      // }
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
