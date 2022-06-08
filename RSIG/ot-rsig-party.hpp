@@ -82,7 +82,7 @@ void run(int argc, const char** argv)
     );
 
     Names N(opt, argc, argv, 2);
-    int buffer_size = 2;
+    int buffer_size = 3;
     if (not opt.lastArgs.empty())
         buffer_size = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");
@@ -139,6 +139,7 @@ void run(int argc, const char** argv)
     opts.check_beaver_open &= prep.params.generateMACs;
     opts.check_open &= prep.params.generateMACs;
     SubProcessor<pShare> proc(_, MCp, prep, P);
+    SubProcessor<pShare> proc2(_, MCp, prep, P);
     typename pShare::prep_type::Direct_MC MCpp(keyp);
     prep.triple_generator->MC = &MCpp;
 
@@ -165,7 +166,7 @@ void run(int argc, const char** argv)
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
     cout << "Running protocol " << buffer_size << " times" << endl;
     pShare s = pShare::constant(0, proc.P.my_num(), MCp.get_alphai());
-    preprocessing(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 0);
+    preprocessing(tuples, opts, proc, proc2, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 0);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
-    print_timers(&timer_struct, buffer_size);
+     print_timers(&timer_struct, buffer_size);
 }

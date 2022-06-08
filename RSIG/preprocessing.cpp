@@ -239,7 +239,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   cout << "line 160" << endl;
   vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  vector<thread> threads;
+  vector<std::thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
@@ -247,10 +247,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
           thread_worker(&d_bits.at(i).at(j), &thread_vals, 1, 0, (EQ_K / num_threads) * 1, &protocol);
       });
       thread testaaj([&] () {
-          thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(ID - 1), (EQ_K / num_threads) * 2, &protocola);
+          thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(2 - 1), (EQ_K / num_threads) * 2, &protocola);
       });
-      threads.push_back(testa);
-      threads.push_back(testaaj);
+      threads.push_back(std::move(testa));
+      threads.push_back(std::move(testaaj));
  //      for(int ID = 1; ID <= num_threads; ID++){
  //        int low = (EQ_K / num_threads)*(ID-1);
  //        int high = (EQ_K / num_threads) * ID;
@@ -266,14 +266,14 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
 	// cout << "ID IS: " << ID << endl;
 	// cout << "ID IS: " << ID << endl;
  //        threads.push_back(std::move(testa));
-      }
+      //}
       for(auto &th : threads){
         if (th.joinable()){
           th.join();
 	      }
       }
       // IS NOT APPLICABLE WHEN THREADING START
-      auto r = d_bits.at(i).at(j).at(0);
+      /*auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
         protocol.prepare_mul(d_bits.at(i).at(j).at(k),r);
@@ -282,7 +282,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
         protocol.check();
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
-      }
+      }*/
       // IS NOT APPLICABLE WHEN THREADING END
 
       auto r = thread_vals.at(1);
