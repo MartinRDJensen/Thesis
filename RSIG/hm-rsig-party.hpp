@@ -7,7 +7,7 @@
 
 
 #include "RSIG/CurveElement.h"
-#include "RSIG/preprocessing.h"
+#include "RSIG/preprocessing.cpp"
 #include "RSIG/sign.cpp"
 
 
@@ -25,7 +25,7 @@
 #include "Processor/Data_Files.hpp"
 #include "GC/ShareSecret.hpp"
 #include "GC/RepPrep.hpp"
-#include "GC/ThredMaster.hpp"
+#include "GC/ThreadMaster.hpp"
 #include "GC/Secret.hpp"
 #include "Machines/ShamirMachine.hpp"
 
@@ -82,7 +82,7 @@ void run(int argc, const char** argv)
     cout << "Running protocol " << buffer_size << " times" << endl;
     pShare s = pShare::constant(0, proc.P.my_num(), MCp.get_alphai());
 
-    preprocessing(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct);
+    preprocessing_subscript(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 0);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
     print_timers(&timer_struct, buffer_size);
 }
