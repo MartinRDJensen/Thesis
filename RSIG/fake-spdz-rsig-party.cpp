@@ -6,8 +6,8 @@
 #include "RSIG/CurveElement.h"
 #include "GC/VectorInput.h"
 
-#include "RSIG/preprocessing.cpp"
-#include "RSIG/sign.cpp"
+#include "RSIG/preprocessing.hpp"
+#include "RSIG/sign.hpp"
 #include <chrono>
 
 #include "Protocols/Beaver.hpp"

@@ -11,7 +11,6 @@
 #include "Protocols/MAC_Check.hpp"
 #include "GC/Secret.hpp"
 #include "GC/TinierSharePrep.hpp"
-//#include "ot-ecdsa-party.hpp"
 #include "ot-rsig-party.hpp"
 
 #include <assert.h>

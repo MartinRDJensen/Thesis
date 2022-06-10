@@ -5,8 +5,8 @@
 #include "Protocols/SemiShare.h"
 #include "Processor/BaseMachine.h"
 
-#include "RSIG/preprocessing.cpp"
-#include "RSIG/sign.cpp"
+#include "RSIG/preprocessing.hpp"
+#include "RSIG/sign.hpp"
 #include "Protocols/ProtocolSet.h"
 
 #include "Protocols/Beaver.hpp"
@@ -147,7 +147,7 @@ void run(int argc, const char** argv)
     prep.params.use_extension = not opt.isSet("-S");
 
     bench_coll timer_struct;
-    vector<RSIGTuple<Share>> tuples(buffer_size);
+    vector<RSIGTuple<T>> tuples(buffer_size);
     // BEGIN FOR HIDING THE RECEIVER
     //THEY DO HAVE THE SIGNER SECRET KEY IN test_keys WHICH IS NOT GOOD
     vector<pShare> skk;

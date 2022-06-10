@@ -250,9 +250,13 @@ semi-ecdsa-party.x: $(OT) $(LIBSIMPLEOT) GC/SemiPrep.o
 mascot-ecdsa-party.x: $(OT) $(LIBSIMPLEOT)
 fake-spdz-ecdsa-party.x: $(OT) $(LIBSIMPLEOT)
 
-semi-rsig-party.x: $(OT) $(LIBSIMPLEOT) GC/SemiPrep.o 
+semi-rsig-party.x: $(OT) $(LIBSIMPLEOT) GC/SemiPrep.o RSIG/transaction.cpp RSIG/util.cpp
 mascot-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
 fake-spdz-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
+mal-rep-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
+mal-shamir-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
+rep-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
+shamir-rsig-party.x: $(OT) $(LIBSIMPLEOT) RSIG/transaction.cpp RSIG/util.cpp
 
 emulate.x: GC/FakeSecret.o
 semi-bmr-party.x: GC/SemiPrep.o $(OT)

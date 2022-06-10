@@ -5,8 +5,8 @@
 #include "Protocols/SemiShare.h"
 #include "Processor/BaseMachine.h"
 
-#include "RSIG/preprocessing.cpp"
-#include "RSIG/sign.cpp"
+#include "RSIG/preprocessing.hpp"
+#include "RSIG/sign.hpp"
 #include "Protocols/ProtocolSet.h"
 
 #include "Protocols/Beaver.hpp"
@@ -147,7 +147,7 @@ void run(int argc, const char** argv)
     prep.params.use_extension = not opt.isSet("-S");
 
     bench_coll timer_struct;
-    vector<RSIGTuple<Share>> tuples(buffer_size);
+    vector<RSIGTuple<T>> tuples(buffer_size);
     // BEGIN FOR HIDING THE RECEIVER
     //THEY DO HAVE THE SIGNER SECRET KEY IN test_keys WHICH IS NOT GOOD
     vector<pShare> skk;
@@ -165,7 +165,7 @@ void run(int argc, const char** argv)
     auto publicKeys = genPublicKeys(5, get<1>(test_keys));
     cout << "Running protocol " << buffer_size << " times" << endl;
     pShare s = pShare::constant(0, proc.P.my_num(), MCp.get_alphai());
-    preprocessing_subscript(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 0);
+    preprocessing_shamir(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 0);
     sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
      print_timers(&timer_struct, buffer_size);
 }
