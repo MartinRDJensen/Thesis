@@ -82,7 +82,7 @@ void run(int argc, const char** argv)
     );
 
     Names N(opt, argc, argv, 2);
-    int buffer_size = 15;
+    int buffer_size = 1000;
     if (not opt.lastArgs.empty())
         buffer_size = atoi(opt.lastArgs[0]->c_str());
     PlainPlayer P(N, "rsig");

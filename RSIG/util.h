@@ -19,7 +19,7 @@ struct bench_coll{
   int buffer_size_sign = 0;
   int buffer_size_verf = 0;
   int total_online = 0;
-  int total_offline = 0;
+  int verf_time = 0;
   int total_online_bytes = 0;
 };
 

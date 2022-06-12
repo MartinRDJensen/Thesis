@@ -38,7 +38,7 @@ void run(int argc, const char** argv)
     ez::ezOptionParser opt;
     RSIGOptions opts(opt, argc, argv);
     Names N(opt, argc, argv, 3);
-    int buffer_size = 10;
+    int buffer_size = 1000;
     if (not opt.lastArgs.empty())
         buffer_size = atoi(opt.lastArgs[0]->c_str());
     CryptoPlayer P(N, "rsig");

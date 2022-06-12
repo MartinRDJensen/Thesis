@@ -175,7 +175,7 @@ bool check(RingSignature<T> signature, SignatureTransaction *tx, std::vector<Cur
   auto VerfTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
   // cout << "Verification took: " << VerfTime << " milliseconds" << endl;
   // cout << "Verification took: " << (float) VerfTime / (float) 1000 << " milliseconds" << endl;
-  timer_struct->total_offline += VerfTime;
+  timer_struct->verf_time += VerfTime;
   return true;
 }
 
