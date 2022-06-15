@@ -29,7 +29,7 @@ Shell 2:
 ```
 for a 2 party protocol where * is to be understood as a wildcard to be filled in.
 
-Specifically to run fake-spdz-rsig-party you will have to create a Player-Data directory in MP-SPDZ and thereafter run Fake-RSIG.x which will create local preprocesing data for the two parties.
+Specifically to run fake-spdz-rsig-party you will have to create a Player-Data directory in MP-SPDZ and thereafter run Fake-RSIG.x which will create local preprocesing data for the two parties. You would also have to set MY_CFLAGS = -DINSECURE in MP-SPDZ/CONFIG.
 
 
 # Notes / Issues
@@ -46,4 +46,4 @@ If after running you encounter the error:
 /PATH/ssl/detail/openssl_types.hpp:23:10: fatal error: 'openssl/conf.h' file not found
 #include <openssl/conf.h>
 ```
-then you need to go into the MP-SPDZ directory and run "make -j8 tldr".
+then you need to go into the MP-SPDZ directory and run "make -j8 tldr". Note that make -j8 tldr requires the original Makefile and the MP-SPDZ/RSIG folder to be empty. Therefore if mk has been run you should reset the MP-SPDZ directory.
