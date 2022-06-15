@@ -26,6 +26,8 @@ Shell 2:
 ```
 where * is to be understood as a wildcard to be filled in.
 
-
 Specifically to run fake-spdz-rsig-party you will have to create a Player-Data directory in MP-SPDZ and thereafter run Fake-RSIG.x which will create local preprocesing data for the two parties.
 
+
+# Notes
+By default the executables will run 1000 iterations. The variable that sets this is the buffer_size variable in the setup files.
