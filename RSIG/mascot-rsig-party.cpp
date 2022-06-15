@@ -17,5 +17,5 @@
 
 int main(int argc, const char** argv)
 {
-    run<Share>(argc, argv);
+  run<Share>(argc, argv);
 }

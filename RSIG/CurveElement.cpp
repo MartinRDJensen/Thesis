@@ -1,6 +1,4 @@
-
 #include "CurveElement.h"
-
 #include "Math/gfp.hpp"
 
 unsigned char CurveElement::zero[crypto_core_ristretto255_BYTES];

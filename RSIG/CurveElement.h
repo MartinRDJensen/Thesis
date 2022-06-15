@@ -1,13 +1,6 @@
-/*
- * Element.h
- *
- */
-
 #ifndef ECDSA_CURVEELEMENT_H_
 #define ECDSA_CURVEELEMENT_H_
-
 #include <sodium.h>
-
 #include "Math/gfp.h"
 
 class CurveElement : public ValueInterface

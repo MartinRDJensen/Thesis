@@ -14,7 +14,6 @@
 #include "GC/TinyMC.h"
 #include "GC/TinierSharePrep.hpp"
 #include "GC/CcdSecret.h"
-//#include "eq.cpp"
 #include <typeinfo>
 #include <bitset>
 
@@ -31,36 +30,8 @@ public:
   vector<T<CurveElement::Scalar>> w_values;
 };
 
-// static int num_threads = 2;
-// static int EQ_K = 40;
-// template<template<class U> class T>
-// void thread_worker(vector<T<CurveElement::Scalar>> *d_bits,
-//                    vector<T<CurveElement::Scalar>> *thread_vals, int ID,
-//                    int low, int high, SPDZ<Share<gfp_<2, 4>>> *protocol){
-//
-//   auto r = d_bits->at(low);
-//   cout << "WE GOT ID AS: " << ID << endl;
-//   for(int k = low+1; k < high; k++) {
-//     cout << "before k: " << k << endl;
-//     auto curr = d_bits->at(k);
-//     cout << "after k: " << k << endl;
-//     protocol->init_mul();
-//     protocol->prepare_mul(curr, r);
-//     protocol->start_exchange();
-//     protocol->stop_exchange();
-//     protocol->check();
-//     auto d = curr + r - protocol->finalize_mul();
-//     r = d;
-//   }
-//   cout << "THREAD_VALS->at("<<ID<<")"<<endl;
-//   thread_vals->at(1) = r;
-// }
-
 template<template<class U> class T>
 void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
-  cout << "line 1" << endl;
-  bool prep_mul = opts.prep_mul;
-  cout << prep_mul << endl;
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -80,8 +51,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
-  //maybe check if mascot do
-  //cout << "After buffer bits" << endl;
   vector<scalarShare> bitters(40);
   if (flag == 0){
     prep.buffer_bits();
@@ -95,13 +64,12 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-  // chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
   chrono::steady_clock::time_point eq_start = std::chrono::steady_clock::now();
 
   if(flag == 0){
@@ -137,7 +105,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
         scalarShare bitShare;
         prep.get_one(DATA_BIT, bitShare);
         tmp1.at(k) = bitShare;
-        //tmp1.push_back(bitShare);
       }
       tmp.push_back(tmp1);
     }
@@ -161,13 +128,14 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   chrono::steady_clock::time_point eq_end = std::chrono::steady_clock::now();
   auto PRANDM = std::chrono::duration_cast<std::chrono::milliseconds>(eq_end - eq_start).count();
   timer_struct->PRANDM = PRANDM;
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
 
   vector<vector<scalarShare>> cShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
@@ -228,44 +196,10 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
       }
     }
   }
-  // vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  // vector<std::thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
-      // thread testa([&] () {
-      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 1, 0, (EQ_K / num_threads) * 1, &protocol);
-      // });
-      // thread testaaj([&] () {
-      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(2 - 1), (EQ_K / num_threads) * 2, &protocola);
-      // });
-      // threads.push_back(std::move(testa));
-      // threads.push_back(std::move(testaaj));
- //      for(int ID = 1; ID <= num_threads; ID++){
- //        int low = (EQ_K / num_threads)*(ID-1);
- //        int high = (EQ_K / num_threads) * ID;
- //        //cout << "low: " << low << " high: " << high << endl;
- //        if (ID == num_threads && EQ_K % num_threads != 0){
- //          high += 1;
- //        }
-	// cout << "ID IS: " << ID << endl;
-	// cout << "ID IS: " << ID << endl;
- //        thread testa([&] () {
- //          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
- //                     });
-	// cout << "ID IS: " << ID << endl;
-	// cout << "ID IS: " << ID << endl;
- //        threads.push_back(std::move(testa));
-      //}
-      // cout << "Before thread joins" << endl;
-      // for(auto &th : threads){
-      //   if (th.joinable()){
-      //     th.join();
-	     //  }
-      // }
-      // cout << "After thread joins" << endl;
-      // IS NOT APPLICABLE WHEN THREADING START
       auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
@@ -276,18 +210,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
       }
-      // IS NOT APPLICABLE WHEN THREADING END
-
-      // auto r = thread_vals.at(1);
-      // for(int k = 2; k < num_threads+1; k ++){
-      //   protocol.init_mul();
-      //   protocol.prepare_mul(thread_vals.at(k),r);
-      //   protocol.start_exchange();
-      //   protocol.stop_exchange();
-      //   protocol.check();
-      //   auto d = thread_vals.at(k) + r - protocol.finalize_mul();
-      //   r = d;
-      // }
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
@@ -296,21 +218,20 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - eq_start).count();
   auto equality_online_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - onlineEQstart).count();
-  // std::cout << "Equality Testing Took: " << equality_testing << " miliseconds" << std::endl;
-  // std::cout << "Equality Testing Took: " << (float) equality_testing / (float) 1000 << " [s]" << std::endl;
-  // std::cout << "Equality online Testing Took: " << equality_online_testing << " miliseconds" << std::endl;
-  // std::cout << "Equality online Testing Took: " << (float) equality_online_testing / (float) 1000 << " [s]" << std::endl;
-  // std::cout << "Equality testing without the multiplication of shares part: " << equality_testing - equality_online_testing << " milliseconds" << endl;
   timer_struct->EQ_TEST_ALL = equality_testing;
   timer_struct->EQ_TEST_TRIPLE_CONSUME = equality_online_testing;
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
 
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
   chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
@@ -332,10 +253,8 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
       protocol.prepare_mul(ws.at(i).at(j), shareOfOne - tuples.at(i).eq_bit_shares.at(j));
     }
   }
-  cout << "kekw" << endl;
   protocol.start_exchange();
   protocol.stop_exchange();
-  cout << "kekw" << endl;
   protocol.check();
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j ++){
@@ -382,8 +301,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
   }
   end = std::chrono::steady_clock::now();
   auto sign_preprocessing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-  // cout << "Generating qs, ws and computing L and Rs locally took: " << sign_preprocessing << " milliseconds" << endl;
-  // cout << "Generating qs, ws and computing L and Rs locally took: " << (float) sign_preprocessing / (float) 1000<< " seconds" << endl;
   timer_struct->q_w_L_R = sign_preprocessing;
   timer.stop();
     cout << "Generated " << buffer_size << " tuples in " << timer.elapsed()
@@ -395,8 +312,6 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
 
 template<template<class U> class T>
 void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
-  bool prep_mul = opts.prep_mul;
-  cout << prep_mul << endl;
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -416,12 +331,9 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
-  //maybe check if mascot do
-  //cout << "After buffer bits" << endl;
   vector<scalarShare> bitters(40);
   if (flag == 0){
     prep.buffer_bits();
-    cout << "we buffer bits" << endl;
     for(int i = 0; i < 40; i ++){
       scalarShare teso;
       prep.get_one(DATA_BIT, teso);
@@ -432,13 +344,12 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-  // chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
   chrono::steady_clock::time_point eq_start = std::chrono::steady_clock::now();
 
   if(flag == 0){
@@ -475,7 +386,6 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
         scalarShare bitShare;
         prep.get_one(DATA_BIT, bitShare);
         tmp1.at(k) = bitShare;
-        //tmp1.push_back(bitShare);
       }
       tmp.push_back(tmp1);
     }
@@ -499,13 +409,12 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto PRANDM = std::chrono::duration_cast<std::chrono::milliseconds>(end - eq_start).count();
   timer_struct->PRANDM = PRANDM;
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
 
   vector<vector<scalarShare>> cShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
@@ -566,44 +475,10 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
       }
     }
   }
-  // vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  // vector<std::thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
-      // thread testa([&] () {
-      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 1, 0, (EQ_K / num_threads) * 1, &protocol);
-      // });
-      // thread testaaj([&] () {
-      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(2 - 1), (EQ_K / num_threads) * 2, &protocola);
-      // });
-      // threads.push_back(std::move(testa));
-      // threads.push_back(std::move(testaaj));
- //      for(int ID = 1; ID <= num_threads; ID++){
- //        int low = (EQ_K / num_threads)*(ID-1);
- //        int high = (EQ_K / num_threads) * ID;
- //        //cout << "low: " << low << " high: " << high << endl;
- //        if (ID == num_threads && EQ_K % num_threads != 0){
- //          high += 1;
- //        }
-	// cout << "ID IS: " << ID << endl;
-	// cout << "ID IS: " << ID << endl;
- //        thread testa([&] () {
- //          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
- //                     });
-	// cout << "ID IS: " << ID << endl;
-	// cout << "ID IS: " << ID << endl;
- //        threads.push_back(std::move(testa));
-      //}
-      // cout << "Before thread joins" << endl;
-      // for(auto &th : threads){
-      //   if (th.joinable()){
-      //     th.join();
-	     //  }
-      // }
-      // cout << "After thread joins" << endl;
-      // IS NOT APPLICABLE WHEN THREADING START
       auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
@@ -614,42 +489,27 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
       }
-      // IS NOT APPLICABLE WHEN THREADING END
-
-      // auto r = thread_vals.at(1);
-      // for(int k = 2; k < num_threads+1; k ++){
-      //   protocol.init_mul();
-      //   protocol.prepare_mul(thread_vals.at(k),r);
-      //   protocol.start_exchange();
-      //   protocol.stop_exchange();
-      //   protocol.check();
-      //   auto d = thread_vals.at(k) + r - protocol.finalize_mul();
-      //   r = d;
-      // }
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
   }
-  cout << "line 10" << endl;
 
   end = std::chrono::steady_clock::now();
   auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - eq_start).count();
   auto equality_online_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - onlineEQstart).count();
-  // std::cout << "Equality Testing Took: " << equality_testing << " miliseconds" << std::endl;
-  // std::cout << "Equality Testing Took: " << (float) equality_testing / (float) 1000 << " [s]" << std::endl;
-  // std::cout << "Equality online Testing Took: " << equality_online_testing << " miliseconds" << std::endl;
-  // std::cout << "Equality online Testing Took: " << (float) equality_online_testing / (float) 1000 << " [s]" << std::endl;
-  // std::cout << "Equality testing without the multiplication of shares part: " << equality_testing - equality_online_testing << " milliseconds" << endl;
   timer_struct->EQ_TEST_ALL = equality_testing;
   timer_struct->EQ_TEST_TRIPLE_CONSUME = equality_online_testing;
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
 
+
+
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
   chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
@@ -684,43 +544,41 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
 
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
-       auto qVal = qs.at(i).at(j)[0]; //.get_share();
-                auto qMAC = qs.at(i).at(j)[1]; // .get_mac();
-                auto qG = G.operator*(qVal);
-                pointShare qGShare;
-                qGShare[0] = qG; //.set_share(qG);
-                qGShare[1] = qMAC; //.set_mac(G.operator*(qMAC));
-                auto tmp = w_mul_const_sub_b.at(i).at(j);
-                auto wconstShare = tmp[0]; //.get_share();
-                auto wconstMAC = tmp[1]; //.get_mac();
-                auto wConstP = publicKeys.at(j).operator*(wconstShare);
-                pointShare stuffP;
-                stuffP[0] = wConstP; //.set_share(wConstP);
-                stuffP[1] = publicKeys.at(j).operator*(wconstMAC); //.set_mac(publicKeys.at(j).operator*(wconstMAC));
-                auto roll = qGShare + stuffP;
+      auto qVal = qs.at(i).at(j)[0]; //.get_share();
+      auto qMAC = qs.at(i).at(j)[1]; // .get_mac();
+      auto qG = G.operator*(qVal);
+      pointShare qGShare;
+      qGShare[0] = qG; //.set_share(qG);
+      qGShare[1] = qMAC; //.set_mac(G.operator*(qMAC));
+      auto tmp = w_mul_const_sub_b.at(i).at(j);
+      auto wconstShare = tmp[0]; //.get_share();
+      auto wconstMAC = tmp[1]; //.get_mac();
+      auto wConstP = publicKeys.at(j).operator*(wconstShare);
+      pointShare stuffP;
+      stuffP[0] = wConstP; //.set_share(wConstP);
+      stuffP[1] = publicKeys.at(j).operator*(wconstMAC); //.set_mac(publicKeys.at(j).operator*(wconstMAC));
+      auto roll = qGShare + stuffP;
 
-                tuples.at(i).secret_L.push_back(roll);
+      tuples.at(i).secret_L.push_back(roll);
 
-                unsigned char h[crypto_hash_sha512_BYTES];
-                CurveElement::get_hash(h, publicKeys.at(j));
-                CurveElement hP = CurveElement::hash_to_group(h);
+      unsigned char h[crypto_hash_sha512_BYTES];
+      CurveElement::get_hash(h, publicKeys.at(j));
+      CurveElement hP = CurveElement::hash_to_group(h);
 
-                auto qhP = hP.operator*(qVal);
-                pointShare qhPShare;
-                qhPShare[0] = qhP; //.set_share(qhP);
-                qhPShare[1] = hP.operator*(qMAC); //.set_mac(hP.operator*(qMAC));
-                auto wConstI = I.operator*(wconstShare);
-                pointShare stuffI;
-                stuffI[0] = wConstI; //.set_share(wConstI);
-                stuffI[1] = I.operator*(wconstMAC); //.set_mac(I.operator*(wconstMAC));
-                roll = qhPShare + stuffI;
-                tuples.at(i).secret_R.push_back(roll);
+      auto qhP = hP.operator*(qVal);
+      pointShare qhPShare;
+      qhPShare[0] = qhP; //.set_share(qhP);
+      qhPShare[1] = hP.operator*(qMAC); //.set_mac(hP.operator*(qMAC));
+      auto wConstI = I.operator*(wconstShare);
+      pointShare stuffI;
+      stuffI[0] = wConstI; //.set_share(wConstI);
+      stuffI[1] = I.operator*(wconstMAC); //.set_mac(I.operator*(wconstMAC));
+      roll = qhPShare + stuffI;
+      tuples.at(i).secret_R.push_back(roll);
     }
   }
   end = std::chrono::steady_clock::now();
   auto sign_preprocessing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-  // cout << "Generating qs, ws and computing L and Rs locally took: " << sign_preprocessing << " milliseconds" << endl;
-  // cout << "Generating qs, ws and computing L and Rs locally took: " << (float) sign_preprocessing / (float) 1000<< " seconds" << endl;
   timer_struct->q_w_L_R = sign_preprocessing;
   timer.stop();
     cout << "Generated " << buffer_size << " tuples in " << timer.elapsed()
@@ -732,8 +590,6 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
 
 template<template<class U> class T>
 void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
-  bool prep_mul = opts.prep_mul;
-  cout << prep_mul << endl;
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -753,8 +609,6 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
   std::vector<std::vector<pointShare>> L;
   std::vector<std::vector<pointShare>> R;
   prep.buffer_triples();
-  //maybe check if mascot do
-  //cout << "After buffer bits" << endl;
   vector<scalarShare> bitters(40);
   if (flag == 0){
     prep.buffer_bits();
@@ -768,12 +622,12 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
   vector<vector<vector<scalarShare>>> bitShares;
   vector<vector<scalarShare>> rrShares(buffer_size);
   int number_of_parties = 6;
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
-//PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
+  //PRANDMULT
   chrono::steady_clock::time_point eq_start = std::chrono::steady_clock::now();
 
   if(flag == 0){
@@ -809,7 +663,6 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
         scalarShare bitShare;
         prep.get_one(DATA_BIT, bitShare);
         tmp1.at(k) = bitShare;
-        //tmp1.push_back(bitShare);
       }
       tmp.push_back(tmp1);
     }
@@ -833,13 +686,11 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
   chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   auto PRANDM = std::chrono::duration_cast<std::chrono::milliseconds>(end - eq_start).count();
   timer_struct->PRANDM = PRANDM;
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
-  //EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
+  //EQUALITY TESTING REST START
 
   vector<vector<scalarShare>> cShares(buffer_size);
   for(int i = 0; i < buffer_size; i++) {
@@ -900,44 +751,10 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
       }
     }
   }
-  // vector<scalarShare> thread_vals(num_threads+10);
   vector<vector<scalarShare>> z(buffer_size);
-  // vector<std::thread> threads;
   auto onlineEQstart = std::chrono::steady_clock::now();
   for(int i = 0; i < buffer_size; i++) {
     for(int j = 0; j < number_of_parties; j++) {
-      // thread testa([&] () {
-      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 1, 0, (EQ_K / num_threads) * 1, &protocol);
-      // });
-      // thread testaaj([&] () {
-      //     thread_worker(&d_bits.at(i).at(j), &thread_vals, 2, (EQ_K / num_threads) *(2 - 1), (EQ_K / num_threads) * 2, &protocola);
-      // });
-      // threads.push_back(std::move(testa));
-      // threads.push_back(std::move(testaaj));
- //      for(int ID = 1; ID <= num_threads; ID++){
- //        int low = (EQ_K / num_threads)*(ID-1);
- //        int high = (EQ_K / num_threads) * ID;
- //        //cout << "low: " << low << " high: " << high << endl;
- //        if (ID == num_threads && EQ_K % num_threads != 0){
- //          high += 1;
- //        }
-	// cout << "ID IS: " << ID << endl;
-	// cout << "ID IS: " << ID << endl;
- //        thread testa([&] () {
- //          thread_worker(&d_bits.at(i).at(j), &thread_vals, ID, low, high, &protocol);
- //                     });
-	// cout << "ID IS: " << ID << endl;
-	// cout << "ID IS: " << ID << endl;
- //        threads.push_back(std::move(testa));
-      //}
-      // cout << "Before thread joins" << endl;
-      // for(auto &th : threads){
-      //   if (th.joinable()){
-      //     th.join();
-	     //  }
-      // }
-      // cout << "After thread joins" << endl;
-      // IS NOT APPLICABLE WHEN THREADING START
       auto r = d_bits.at(i).at(j).at(0);
       for(int k = 1; k < 40; k++) {
         protocol.init_mul();
@@ -948,18 +765,6 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
         auto d = d_bits.at(i).at(j).at(k) + r - protocol.finalize_mul();
         r = d;
       }
-      // IS NOT APPLICABLE WHEN THREADING END
-
-      // auto r = thread_vals.at(1);
-      // for(int k = 2; k < num_threads+1; k ++){
-      //   protocol.init_mul();
-      //   protocol.prepare_mul(thread_vals.at(k),r);
-      //   protocol.start_exchange();
-      //   protocol.stop_exchange();
-      //   protocol.check();
-      //   auto d = thread_vals.at(k) + r - protocol.finalize_mul();
-      //   r = d;
-      // }
       auto one = scalarShare::constant(1, proc.P.my_num(), MCp.get_alphai());
       tuples.at(i).eq_bit_shares.push_back(one - r);
     }
@@ -968,21 +773,19 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
   end = std::chrono::steady_clock::now();
   auto equality_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - eq_start).count();
   auto equality_online_testing = std::chrono::duration_cast<std::chrono::milliseconds>(end - onlineEQstart).count();
-  // std::cout << "Equality Testing Took: " << equality_testing << " miliseconds" << std::endl;
-  // std::cout << "Equality Testing Took: " << (float) equality_testing / (float) 1000 << " [s]" << std::endl;
-  // std::cout << "Equality online Testing Took: " << equality_online_testing << " miliseconds" << std::endl;
-  // std::cout << "Equality online Testing Took: " << (float) equality_online_testing / (float) 1000 << " [s]" << std::endl;
-  // std::cout << "Equality testing without the multiplication of shares part: " << equality_testing - equality_online_testing << " milliseconds" << endl;
   timer_struct->EQ_TEST_ALL = equality_testing;
   timer_struct->EQ_TEST_TRIPLE_CONSUME = equality_online_testing;
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
-  //END OF EQUALITY TESTING PROTOCOL 2
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
+  //EQUALITY TESTING REST END
 
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
+  //Rest takes care of making q, w, L and R values.
   chrono::steady_clock::time_point  begin = std::chrono::steady_clock::now();
   vector<vector<scalarShare>> qs(buffer_size), ws(buffer_size);
   vector<vector<scalarShare>> w_mul_const_sub_b(buffer_size);
@@ -1017,37 +820,35 @@ void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProc
 
   for(int i = 0; i < buffer_size; i++){
     for(int j = 0; j < number_of_parties; j++){
-                auto qVal = qs.at(i).at(j); //.get_share();
-                auto qG = G.operator*(qVal);
-                pointShare qGShare;
-                qGShare = qG; //.set_share(qG);
-                auto tmp = w_mul_const_sub_b.at(i).at(j);
-                auto wconstShare = tmp; //.get_share();
-                auto wConstP = publicKeys.at(j).operator*(wconstShare);
-                pointShare stuffP;
-                stuffP = wConstP; //.set_share(wConstP);
-                auto roll = qGShare + stuffP;
+      auto qVal = qs.at(i).at(j); //.get_share();
+      auto qG = G.operator*(qVal);
+      pointShare qGShare;
+      qGShare = qG; //.set_share(qG);
+      auto tmp = w_mul_const_sub_b.at(i).at(j);
+      auto wconstShare = tmp; //.get_share();
+      auto wConstP = publicKeys.at(j).operator*(wconstShare);
+      pointShare stuffP;
+      stuffP = wConstP; //.set_share(wConstP);
+      auto roll = qGShare + stuffP;
 
-                tuples.at(i).secret_L.push_back(roll);
+      tuples.at(i).secret_L.push_back(roll);
 
-                unsigned char h[crypto_hash_sha512_BYTES];
-                CurveElement::get_hash(h, publicKeys.at(j));
-                CurveElement hP = CurveElement::hash_to_group(h);
+      unsigned char h[crypto_hash_sha512_BYTES];
+      CurveElement::get_hash(h, publicKeys.at(j));
+      CurveElement hP = CurveElement::hash_to_group(h);
 
-                auto qhP = hP.operator*(qVal);
-                pointShare qhPShare;
-                qhPShare = qhP; //.set_share(qhP);
-                auto wConstI = I.operator*(wconstShare);
-                pointShare stuffI;
-                stuffI = wConstI; //.set_share(wConstI);
-                roll = qhPShare + stuffI;
-                tuples.at(i).secret_R.push_back(roll);
+      auto qhP = hP.operator*(qVal);
+      pointShare qhPShare;
+      qhPShare = qhP; //.set_share(qhP);
+      auto wConstI = I.operator*(wconstShare);
+      pointShare stuffI;
+      stuffI = wConstI; //.set_share(wConstI);
+      roll = qhPShare + stuffI;
+      tuples.at(i).secret_R.push_back(roll);
     }
   }
   end = std::chrono::steady_clock::now();
   auto sign_preprocessing = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-  // cout << "Generating qs, ws and computing L and Rs locally took: " << sign_preprocessing << " milliseconds" << endl;
-  // cout << "Generating qs, ws and computing L and Rs locally took: " << (float) sign_preprocessing / (float) 1000<< " seconds" << endl;
   timer_struct->q_w_L_R = sign_preprocessing;
   timer.stop();
     cout << "Generated " << buffer_size << " tuples in " << timer.elapsed()

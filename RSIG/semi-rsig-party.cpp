@@ -1,8 +1,3 @@
-/*
- * fake-spdz-ecdsa-party.cpp
- *
- */
-
 #include "GC/SemiSecret.h"
 #include "GC/SemiPrep.h"
 
@@ -17,5 +12,5 @@
 
 int main(int argc, const char** argv)
 {
-    run<SemiShare>(argc, argv);
+  run<SemiShare>(argc, argv);
 }
