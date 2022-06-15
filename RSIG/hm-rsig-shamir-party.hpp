@@ -36,7 +36,6 @@ void run(int argc, const char** argv)
 {
   bigint::init_thread();
   ez::ezOptionParser opt;
-  RSIGOptions opts(opt, argc, argv);
   Names N(opt, argc, argv, 3);
   int buffer_size = 1000;
   if (not opt.lastArgs.empty())
@@ -78,7 +77,7 @@ void run(int argc, const char** argv)
   auto publicKeys = genPublicKeys(5, get<1>(test_keys));
   pShare s = pShare::constant(0, proc.P.my_num(), MCp.get_alphai());
 
-  preprocessing_shamir(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 0);
+  preprocessing_shamir(tuples, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 0);
   sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
   print_timers(&timer_struct, buffer_size);
 }

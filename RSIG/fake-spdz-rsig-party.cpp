@@ -28,7 +28,7 @@
 
 int main(int argc, const char** argv){
   ez::ezOptionParser opt;
-  RSIGOptions opts(opt, argc, argv);
+  // RSIGOptions opts(opt, argc, argv);
   Names N(opt, argc, argv, 2);
   int buffer_size = 1000;
   if (not opt.lastArgs.empty())
@@ -60,7 +60,7 @@ int main(int argc, const char** argv){
   auto test_keys = gen(skk);
   SignatureTransaction *tx = genTransaction(get<2>(test_keys));
   auto publicKeys = genPublicKeys(5, get<1>(test_keys));
-  preprocessing(tuples, opts, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 1);
+  preprocessing(tuples, proc, buffer_size, publicKeys, get<2>(test_keys), s, &timer_struct, 1);
   sign_benchmark(tx, tuples, sk, get<2>(test_keys), publicKeys, MCp, P, proc, &timer_struct);
   print_timers(&timer_struct, buffer_size);
 }

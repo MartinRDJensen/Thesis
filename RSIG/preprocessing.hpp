@@ -31,7 +31,7 @@ public:
 };
 
 template<template<class U> class T>
-void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
+void preprocessing(vector<RSIGTuple<T>>& tuples, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -311,7 +311,7 @@ void preprocessing(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T
 }
 
 template<template<class U> class T>
-void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
+void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
   Timer timer;
   timer.start();
   Player& P = proc.P;
@@ -589,7 +589,7 @@ void preprocessing_subscript(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubP
 }
 
 template<template<class U> class T>
-void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, RSIGOptions opts,SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
+void preprocessing_shamir(vector<RSIGTuple<T>>& tuples, SubProcessor<T<CurveElement::Scalar>>& proc, int buffer_size, std::vector<CurveElement> publicKeys, CurveElement I, T<CurveElement::Scalar> s, bench_coll *timer_struct, int flag){
   Timer timer;
   timer.start();
   Player& P = proc.P;
