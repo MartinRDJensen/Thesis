@@ -1,10 +1,31 @@
 # Thesis
 CryptoNote white paper over MPC
 
-# How to run
-Have MP-SPDZ library and this git repository in same folder e.g:
-ls example\_folder -> MP-SDPZ, Thesis, rest
+# How to compile
+Have the MP-SPDZ library and this git repository in same folder i.e a folde structure like the following:
+```
+                   ---- MP-SPDZ
+top-level-folder --|
+                   ---- Thesis
+```
 
-To make things easier in the Thesis folder. Run the command "source ./make.sh".
+To make things easier in the Thesis folder run the command "source ./make.sh".
 This sets up aliases that we have used throughout the project. The most relevanvt being 'mk' and it should only be executed when in the Thesis folder.
-If you write the command "mk" it runs the makefile in the MP-SPDZ folder.
+If you write the command "mk" it runs the makefile, we have in Thesis, in the MP-SPDZ folder.
+However, before you run "mk" a directory called RSIG in MP-SPDZ should be created as well.
+
+After compiling with "mk" there will be various files with the naming "*-rsig-party.x" in the MP-SPDZ directory.
+To run these use the following syntax:
+
+```
+Shell 1:
+./*-rsig-party.x -p 0
+
+Shell 2:
+./*-rsig-party.x -p 0
+```
+where * is to be understood as a wildcard to be filled in.
+
+
+Specifically to run fake-spdz-rsig-party you will have to create a Player-Data directory in MP-SPDZ and thereafter run Fake-RSIG.x which will create local preprocesing data for the two parties.
+
