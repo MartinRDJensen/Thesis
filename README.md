@@ -30,4 +30,4 @@ Specifically to run fake-spdz-rsig-party you will have to create a Player-Data d
 
 
 # Notes
-By default the executables will run 1000 iterations. The variable that sets this is the buffer_size variable in the setup files.
+By default the executables will run 1000 iterations. The variable that sets this is the buffer_size variable in the setup files. To easily see the places where to change it use grep -r "buffer_size" in the Thesis directroy.
