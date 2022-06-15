@@ -22,9 +22,9 @@ Shell 1:
 ./*-rsig-party.x -p 0
 
 Shell 2:
-./*-rsig-party.x -p 0
+./*-rsig-party.x -p 1
 ```
-where * is to be understood as a wildcard to be filled in.
+for a 2 party protocol where * is to be understood as a wildcard to be filled in.
 
 Specifically to run fake-spdz-rsig-party you will have to create a Player-Data directory in MP-SPDZ and thereafter run Fake-RSIG.x which will create local preprocesing data for the two parties.
 
